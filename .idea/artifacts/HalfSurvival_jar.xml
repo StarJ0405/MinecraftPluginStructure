@@ -2,7 +2,7 @@
   <artifact type="jar" name="HalfSurvival:jar">
     <output-path>D:/작업용/Minecraft/LostArk Discord/HalfSurvival Season3/plugins</output-path>
     <root id="archive" name="HalfSurvival.jar">
-      <element id="module-output" name="HalfSurvival" />
+      <element id="module-output" name="MineCraftPluginStructure" />
       <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
     </root>
   </artifact>
