@@ -17,10 +17,12 @@ public class Core extends JavaPlugin {
         return core;
     }
 
+    @Override
     public void onEnable() {
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 시작되었습니다.");
         core = this;
         //
+
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new EntityListener(), this);
         pm.registerEvents(new PlayerListener(), this);
@@ -30,10 +32,9 @@ public class Core extends JavaPlugin {
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 정상적으로 불러와졌습니다.");
     }
 
-
+    @Override
     public void onDisable() {
         //
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 종료되었습니다.");
     }
-
 }
