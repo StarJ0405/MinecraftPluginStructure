@@ -1,4 +1,4 @@
-package shining.starj.structure.Listeners;
+package shining.starj.structure.Listeners.Player;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
