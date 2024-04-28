@@ -1,5 +1,6 @@
 package shining.starj.structure.Commands.Custom;
 
+import lombok.Builder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -9,16 +10,15 @@ import shining.starj.structure.Commands.AbstractCommandLine;
 import shining.starj.structure.Commands.SenderType;
 
 public class TestCommand extends AbstractCommand {
-    private final static TestCommand TEST_COMMAND = new TestCommand();
 
-    protected TestCommand() {
+    public TestCommand() {
         super("test",
                 new AbstractCommandLine[]{FirstLine.builder().senderType(SenderType.Player).length(0).build()}
         );
     }
 
     static class FirstLine extends AbstractCommandLine {
-
+        @Builder
         public FirstLine(SenderType senderType, SenderType[] senderTypes, Integer length, Integer min, Integer max) {
             super(senderType, senderTypes, length, min, max);
         }
@@ -28,4 +28,5 @@ public class TestCommand extends AbstractCommand {
             sender.sendMessage(ChatColor.RED + "잘 작동합니다.");
         }
     }
+
 }

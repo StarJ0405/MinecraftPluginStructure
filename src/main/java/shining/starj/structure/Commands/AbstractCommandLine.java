@@ -13,7 +13,7 @@ public abstract class AbstractCommandLine {
     private final SenderType[] senderTypes; // 명령어 사용 가능 유형
 
 
-    @Builder
+
     public AbstractCommandLine(SenderType senderType, SenderType[] senderTypes, Integer length, Integer min, Integer max) {
         this.senderTypes = senderTypes != null && senderTypes.length > 0 ? senderTypes : (senderType != null ? new SenderType[]{senderType} : new SenderType[0]);
         length = length != null ? length : 0;

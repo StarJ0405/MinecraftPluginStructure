@@ -9,9 +9,9 @@
     <packaging>jar</packaging>
     <name>StarJ</name>
     <url>https://github.com/StarJ0405</url>
-    <description>For Survival In Minecraft With Special Functions</description>
+    <description>Framework for Creating Minecraft Plugin</description>
     <properties>
-        <buildNo></buildNo>
+        <buildNo/>
     </properties>
     <build>
         <finalName>${project.artifactId}-${project.version}${buildNo}</finalName>
@@ -48,6 +48,11 @@
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

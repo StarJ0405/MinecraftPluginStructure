@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
+
     //
     private final List<AbstractCommandLine> lines;
     private final List<AbstractTab> tabs;
@@ -27,8 +28,10 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         for (AbstractCommandLine commandLine : lines)
-            if (commandLine.check(sender, cmd, label, args))
+            if (commandLine.check(sender, cmd, label, args)) {
                 commandLine.run(sender, cmd, label, args);
+                return true;
+            }
         return false;
     }
 
@@ -39,5 +42,9 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
             if (tab.isSlot(args))
                 list.addAll(tab.getString(args[args.length - 1], args));
         return list;
+    }
+
+    public static void intial(){
+        new TestCommand();
     }
 }
