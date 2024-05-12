@@ -4,8 +4,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import shining.starj.structure.Listeners.AbstractEventListener;
 
-public class PlayerListener implements Listener {
+public class PlayerListener extends AbstractEventListener {
     @EventHandler
     public void Events(PlayerJoinEvent e) {
         // 플레이어 접속시 발생하는 이벤트

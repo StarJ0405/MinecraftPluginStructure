@@ -1,4 +1,4 @@
-package shining.starj.structure.Recipes;
+package shining.starj.structure.Items.Recipes;
 
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
