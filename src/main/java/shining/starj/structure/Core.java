@@ -3,14 +3,9 @@ package shining.starj.structure;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.inventory.FurnaceRecipe;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Listeners.AbstractEventListener;
-
-import java.util.Iterator;
 
 public class Core extends JavaPlugin {
     @Getter
