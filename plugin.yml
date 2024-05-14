@@ -5,8 +5,23 @@ main: shining.starj.structure.Core
 api-version: 1.20
 author: StarJ
 
-commands:
-  test:
-    description: "테스트"
-    usage : "/test"
-    operator : admin
+
+
+preset:
+  commands:
+    test:
+      description: "테스트"
+      usage: "/test"
+      operator: admin
+      aliases: [ t,tes ]
+      permission: test.T
+      permission-message: You do not have permission to use this command.
+  permissions:
+    test.T:
+      description: "Allows you to use the command /test"
+      default: true
+    test.*:
+      description: Wildcard permission
+      default: op
+      children:
+        test.foo: true

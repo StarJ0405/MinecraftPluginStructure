@@ -5,7 +5,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
-import shining.starj.structure.Commands.Custom.TestCommand;
 import shining.starj.structure.Core;
 
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
         return list;
     }
 
-    public static void intial(){
-        new TestCommand();
+    public static void initial(){
+
     }
 }

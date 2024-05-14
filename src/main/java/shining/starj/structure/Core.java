@@ -15,7 +15,7 @@ public class Core extends JavaPlugin {
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 시작되었습니다.");
         core = this;
         //
-        AbstractCommand.intial(); // 명령어
+        AbstractCommand.initial(); // 명령어
         AbstractEventListener.initial(); // 이벤트
 
         //

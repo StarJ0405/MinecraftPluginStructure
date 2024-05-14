@@ -6,7 +6,7 @@ import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
-import shining.starj.structure.Entities.animal.CustomWolf;
+import shining.starj.structure.Entities.Animal.CustomWolf;
 
 import java.util.Objects;
 

@@ -1,4 +1,4 @@
-package shining.starj.structure.Entities.animal;
+package shining.starj.structure.Entities.Animal;
 
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.EntityWolf;
