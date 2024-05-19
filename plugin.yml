@@ -5,7 +5,11 @@ main: shining.starj.structure.Core
 api-version: 1.20
 author: StarJ
 
-
+commands:
+  sudo:
+    description: "명령어를 강제로 시키는 명령어"
+    usage: "/sudo [player] [..args]"
+    operator: admin
 
 preset:
   commands:

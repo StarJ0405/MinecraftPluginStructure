@@ -1,4 +1,4 @@
-package shining.starj.structure.Listeners.Abstract;
+package shining.starj.structure.Listeners.Global.Abstract;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

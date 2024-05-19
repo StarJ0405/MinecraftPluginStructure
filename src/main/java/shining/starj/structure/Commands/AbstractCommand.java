@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
+import shining.starj.structure.Commands.Custom.SudoCommand;
 import shining.starj.structure.Core;
 
 import java.util.ArrayList;
@@ -26,10 +27,12 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
+
         for (AbstractCommandLine commandLine : lines)
             if (commandLine.check(sender, cmd, label, args)) {
-                commandLine.run(sender, cmd, label, args);
-                return true;
+                boolean pass = commandLine.run(sender, cmd, label, args);
+                if (pass)
+                    return true;
             }
         return false;
     }
@@ -43,7 +46,7 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
         return list;
     }
 
-    public static void initial(){
-
+    public static void initial() {
+        new SudoCommand();
     }
 }

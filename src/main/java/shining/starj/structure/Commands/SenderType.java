@@ -3,7 +3,6 @@ package shining.starj.structure.Commands;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 
@@ -12,6 +11,12 @@ public enum SenderType {
         @Override
         public boolean iSame(CommandSender sender) {
             return sender instanceof Player;
+        }
+    },
+    OP_PLayer {
+        @Override
+        public boolean iSame(CommandSender sender) {
+            return sender instanceof Player && sender.isOp();
         }
     }, Console {
         @Override
@@ -23,7 +28,7 @@ public enum SenderType {
         public boolean iSame(CommandSender sender) {
             return sender instanceof BlockCommandSender;
         }
-    },Minecart{
+    }, Minecart {
         @Override
         public boolean iSame(CommandSender sender) {
             return sender instanceof CommandMinecart;
@@ -33,6 +38,10 @@ public enum SenderType {
     ;
 
     public abstract boolean iSame(CommandSender sender);
+
+    public static SenderType[] ops() {
+        return new SenderType[]{OP_PLayer, Console, Block, Minecart};
+    }
 //    public static SenderType valueOf(CommandSender sender){
 //        if(sender instanceof org.bukkit.entity.Player)
 //            return SenderType.Player;

@@ -18,4 +18,5 @@ public abstract class AbstractTab {
     }
 
     public abstract List<String> getString(String value, String[] args);
+
 }
