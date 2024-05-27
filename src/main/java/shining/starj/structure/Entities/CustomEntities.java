@@ -15,7 +15,7 @@ public class CustomEntities {
 
     // 소환 명령어 엔티티를 반환
     public Entity Spawn(@NotNull Location loc) {
-        World world = ((CraftWorld) Objects.requireNonNull(loc.getWorld())).getHandle();
+        World world = ((CraftWorld) loc.getWorld()).getHandle();
         CustomWolf entity = new CustomWolf(world);
         world.addFreshEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
         entity.a(loc.getX(), loc.getY(), loc.getZ());

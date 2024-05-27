@@ -5,7 +5,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import shining.starj.structure.Core;
 import shining.starj.structure.Listeners.Global.TimeListener;
-import shining.starj.structure.Listeners.Player.Prework.PlayerCommandPreprocessListener;
+import shining.starj.structure.Listeners.Prework.CommandPreprocessListener;
 
 public abstract class AbstractEventListener implements Listener {
 
@@ -20,6 +20,6 @@ public abstract class AbstractEventListener implements Listener {
         // 글로벌
         new TimeListener();
         // 플레이어
-        new PlayerCommandPreprocessListener();
+        new CommandPreprocessListener();
     }
 }

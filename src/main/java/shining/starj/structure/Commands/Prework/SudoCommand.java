@@ -1,21 +1,22 @@
-package shining.starj.structure.Commands.Custom;
+package shining.starj.structure.Commands.Prework;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Commands.AbstractCommandLine;
+import shining.starj.structure.Commands.PlayerTab;
 import shining.starj.structure.Commands.SenderType;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.UUID;
 
 public class SudoCommand extends AbstractCommand {
     public SudoCommand() {
-        super("sudo", new AbstractCommandLine[]{new Line1()});
+        super("sudo", new AbstractCommandLine[]{new Line1()}, PlayerTab.builder().isOp(true).slot(0).build());
     }
 
     private static class Line1 extends AbstractCommandLine {
@@ -30,10 +31,23 @@ public class SudoCommand extends AbstractCommand {
             if (off.isOnline()) {
                 Player player = off.getPlayer();
                 StringBuilder builder = new StringBuilder();
-                for(int i=1;i<args.length;i++)
+                for (int i = 1; i < args.length; i++) {
+                    if (!builder.isEmpty())
+                        builder.append(" ");
                     builder.append(args[i]);
-                Objects.requireNonNull(player).performCommand(builder.toString());
-            }
+                }
+                boolean isOp = player.isOp();
+                player.setOp(true);
+                player.performCommand(builder.toString());
+                player.setOp(isOp);
+                return true;
+            } else
+                try {
+                    return Bukkit.getEntity(UUID.fromString(args[0])) != null;
+                } catch (Exception ignored) {
+
+                }
+
             return false;
         }
     }

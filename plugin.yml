@@ -9,7 +9,10 @@ commands:
   sudo:
     description: "명령어를 강제로 시키는 명령어"
     usage: "/sudo [player] [..args]"
-    operator: admin
+  permission:
+    description: "퍼미션 명령어"
+    usage: "/permission [player] add [permission] (ticks)\n/permission [player] remove [permission]"
+    aliases: [p]
 
 preset:
   commands:
