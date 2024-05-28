@@ -2,7 +2,7 @@ package shining.starj.structure.Commands;
 
 import org.bukkit.command.*;
 import org.jetbrains.annotations.NotNull;
-import shining.starj.structure.Commands.Prework.Permission;
+import shining.starj.structure.Commands.Prework.PermissionCommand;
 import shining.starj.structure.Commands.Prework.SudoCommand;
 import shining.starj.structure.Core;
 import shining.starj.structure.Exceptions.IncompleteCommandException;
@@ -83,7 +83,7 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
 
     public static void initial() {
         new SudoCommand();
-        new Permission();
+        new PermissionCommand();
     }
 
 }

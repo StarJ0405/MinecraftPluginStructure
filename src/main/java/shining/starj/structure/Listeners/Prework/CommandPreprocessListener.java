@@ -1,5 +1,6 @@
 package shining.starj.structure.Listeners.Prework;
 
+import lombok.Builder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
+@Builder
 public class CommandPreprocessListener extends AbstractEventListener {
     // https://www.digminecraft.com/getting_started/target_selectors.php
 

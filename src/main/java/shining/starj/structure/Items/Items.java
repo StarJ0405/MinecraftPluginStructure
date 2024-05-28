@@ -1,5 +1,7 @@
 package shining.starj.structure.Items;
 
+import lombok.Builder;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -8,7 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+@Getter
 public class Items {
     private final static List<Items> list = new ArrayList<Items>();
     // 기타
@@ -19,50 +21,19 @@ public class Items {
     protected final int model;
     protected final boolean interact;
 
-    public Items(String key, String displayName, Material material, String[] lores) {
-        this(key, displayName, material, lores, 0, true);
-    }
-
-    public Items(String key, String displayName, Material material, String[] lores, int model) {
-        this(key, displayName, material, lores, model, true);
-    }
-
-    public Items(String key, String displayName, Material material, String[] lores, boolean interact) {
-        this(key, displayName, material, lores, 0, interact);
-    }
-
+    @Builder
     public Items(String key, String displayName, Material material, String[] lores, int model, boolean interact) {
         this.key = key;
         this.displayName = displayName;
         this.material = material;
-        this.lores = Arrays.asList(lores);
+        this.lores = lores != null ? Arrays.asList(lores) : new ArrayList<>();
         this.model = model;
         this.interact = interact;
         //
         list.add(this);
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public List<String> getLores() {
-        return lores;
-    }
-
-    public int getModel() {
-        return model;
-    }
-
-    public boolean isInteract() {
-        return interact;
-    }
-
-    public ItemStack getItemStack() {
+   public ItemStack getItemStack() {
         ItemStack item = new ItemStack(this.material);
         ItemMeta meta = item.getItemMeta();
         meta.setCustomModelData(this.model);

@@ -4,19 +4,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Commands.AbstractCommandLine;
-import shining.starj.structure.Commands.PlayerTab;
 import shining.starj.structure.Commands.SenderType;
 
 import java.util.UUID;
 
 public class SudoCommand extends AbstractCommand {
     public SudoCommand() {
-        super("sudo", new AbstractCommandLine[]{new Line1()}, PlayerTab.builder().isOp(true).slot(0).build());
+        super("sudo", true, new AbstractCommandLine[]{new Line1()}, PlayerTab.builder().isOp(true).slot(0).build());
     }
 
     private static class Line1 extends AbstractCommandLine {

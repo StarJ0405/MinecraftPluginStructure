@@ -1,10 +1,12 @@
-package shining.starj.structure.Commands;
+package shining.starj.structure.Commands.Prework;
 
 import lombok.Builder;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import shining.starj.structure.Commands.AbstractTab;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +31,28 @@ public class PlayerTab extends AbstractTab {
                 super.add(value, list);
                 list.add(value + "..");
             }
-        }, World("world="), X("x="), Y("y="), Z("z="), dx("dx="), dy("dy="), dz("dz="), Score("score={"), Level("level="), Gamemode("gamemode="), Name("name="), Tag("tag="), Type("type="), Limit("limit=")
+        }, World("world="){
+            @Override
+            public boolean check(String value, String begin) {
+                return value.lastIndexOf("]") == -1 && begin.contains(this.value) && value.lastIndexOf("=") <= value.length() - 1;
+            }
+
+            @Override
+            public void add(String value, List<String> list) {
+                super.add(value, list);
+                if(value.contains("=")) {
+                    String confirm = value.substring(value.lastIndexOf('=')+1);
+                    String begin = value.substring(0,value.lastIndexOf('=')+1);
+                    for (org.bukkit.World world : Bukkit.getWorlds())
+                        if (world.getName().toLowerCase().startsWith(confirm.toLowerCase()))
+                            list.add(begin+world.getName());
+                }
+            }
+        }, X("x="), Y("y="), Z("z="), dx("dx="), dy("dy="), dz("dz="), Score("score={"), Level("level="), Gamemode("gamemode="), Name("name="), Tag("tag="), Type("type="), Limit("limit=")
         //
         ;
 
-        private final String value;
+        protected final String value;
 
         Parameters(String value) {
             this.value = value;

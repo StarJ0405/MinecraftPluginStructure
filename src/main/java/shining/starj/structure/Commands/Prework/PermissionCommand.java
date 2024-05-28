@@ -12,9 +12,9 @@ import shining.starj.structure.Systems.PermissionStore;
 
 import java.util.*;
 
-public class Permission extends AbstractCommand {
-    public Permission() {
-        super("permission", new AbstractCommandLine[]{new line1()}, PlayerTab.builder().isOp(true).slot(0).build(), new function(), new permission());
+public class PermissionCommand extends AbstractCommand {
+    public PermissionCommand() {
+        super("permission", true, new AbstractCommandLine[]{new line1()}, PlayerTab.builder().isOp(true).slot(0).build(), new function(), new permission());
     }
 
     //permission [player] add [permission] (ticks)
