@@ -16,7 +16,7 @@ import shining.starj.structure.Listeners.AbstractEventListener;
 public abstract class AbstractTimeListener extends AbstractEventListener {
     private final Location timeLocation = getTimeLocation();
 
-    public abstract void Events();
+    public abstract void TimePassEvent();
 
 
     private Location getTimeLocation() {
@@ -61,18 +61,18 @@ public abstract class AbstractTimeListener extends AbstractEventListener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void Events(FurnaceSmeltEvent e) {
+    public void Event(FurnaceSmeltEvent e) {
         Block block = e.getBlock();
         if (isItem(e.getResult()))
             if (isCorrectLocation(block)) {
                 refillItems(block);
-                Events();
+                TimePassEvent();
             } else
                 removeFurnace(block);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void Events(ServerLoadEvent e) {
+    public void Event(ServerLoadEvent e) {
         for (int x = -1; x <= 1; x++)
             for (int y = -1; y <= 0; y++)
                 for (int z = -1; z < 1; z++)
@@ -86,7 +86,7 @@ public abstract class AbstractTimeListener extends AbstractEventListener {
 
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void Events(FurnaceBurnEvent e) {
+    public void Event(FurnaceBurnEvent e) {
         Block block = e.getBlock();
         if (isCorrectLocation(block))
             refillItems(block);
