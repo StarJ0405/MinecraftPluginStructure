@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.server.ServerLoadEvent;
@@ -59,7 +60,7 @@ public abstract class AbstractTimeListener extends AbstractEventListener {
         return true;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void Events(FurnaceSmeltEvent e) {
         Block block = e.getBlock();
         if (isItem(e.getResult()))
@@ -70,7 +71,7 @@ public abstract class AbstractTimeListener extends AbstractEventListener {
                 removeFurnace(block);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void Events(ServerLoadEvent e) {
         for (int x = -1; x <= 1; x++)
             for (int y = -1; y <= 0; y++)
@@ -84,7 +85,7 @@ public abstract class AbstractTimeListener extends AbstractEventListener {
     }
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void Events(FurnaceBurnEvent e) {
         Block block = e.getBlock();
         if (isCorrectLocation(block))

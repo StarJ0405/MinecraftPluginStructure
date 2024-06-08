@@ -3,8 +3,9 @@ package shining.starj.structure.Commands.Prework;
 import lombok.Builder;
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
+import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import shining.starj.structure.Commands.AbstractTab;
 
@@ -31,7 +32,50 @@ public class PlayerTab extends AbstractTab {
                 super.add(value, list);
                 list.add(value + "..");
             }
-        }, World("world="){
+        }, World("world=") {
+            @Override
+            public boolean check(String value, String begin) {
+//             && !begin.contains("..")
+                return value.lastIndexOf("]") == -1 && begin.contains(this.value) && value.lastIndexOf("=") <= value.length() - 1;
+            }
+
+            @Override
+            public void add(String value, List<String> list) {
+                super.add(value, list);
+                if (value.contains("=")) {
+                    String confirm = value.substring(value.lastIndexOf('=') + 1);
+                    String begin = value.substring(0, value.lastIndexOf('=') + 1);
+                    for (org.bukkit.World world : Bukkit.getWorlds())
+                        if (world.getName().toLowerCase().startsWith(confirm.toLowerCase()))
+                            list.add(begin + world.getName());
+                }
+            }
+        }, X("x=") {}, Y("y="), Z("z="), dx("dx="), dy("dy="), dz("dz="), Score("score={") {
+            @Override
+            public boolean check(String value, String begin) {
+                return super.check(value, begin) && !begin.contains("..");
+            }
+
+            @Override
+            public void add(String value, List<String> list) {
+                super.add(value, list);
+                if (value.lastIndexOf('}') != value.length() - 1) {
+                    list.add(value + "..");
+                    list.add(value + "}");
+                }
+            }
+        }, Level("level=") {
+            @Override
+            public boolean check(String value, String begin) {
+                return super.check(value, begin) && !begin.contains("..");
+            }
+
+            @Override
+            public void add(String value, List<String> list) {
+                super.add(value, list);
+                list.add(value + "..");
+            }
+        }, Gamemode("gamemode=") {
             @Override
             public boolean check(String value, String begin) {
                 return value.lastIndexOf("]") == -1 && begin.contains(this.value) && value.lastIndexOf("=") <= value.length() - 1;
@@ -40,15 +84,32 @@ public class PlayerTab extends AbstractTab {
             @Override
             public void add(String value, List<String> list) {
                 super.add(value, list);
-                if(value.contains("=")) {
-                    String confirm = value.substring(value.lastIndexOf('=')+1);
-                    String begin = value.substring(0,value.lastIndexOf('=')+1);
-                    for (org.bukkit.World world : Bukkit.getWorlds())
-                        if (world.getName().toLowerCase().startsWith(confirm.toLowerCase()))
-                            list.add(begin+world.getName());
+                if (value.contains("=")) {
+                    String confirm = value.substring(value.lastIndexOf('=') + 1);
+                    String begin = value.substring(0, value.lastIndexOf('=') + 1);
+                    for (GameMode gamemode : GameMode.values())
+                        if (gamemode.name().toLowerCase().startsWith(confirm.toLowerCase()))
+                            list.add(begin + gamemode.name());
                 }
             }
-        }, X("x="), Y("y="), Z("z="), dx("dx="), dy("dy="), dz("dz="), Score("score={"), Level("level="), Gamemode("gamemode="), Name("name="), Tag("tag="), Type("type="), Limit("limit=")
+        }, Name("name="), Tag("tag="), Type("type=") {
+            @Override
+            public boolean check(String value, String begin) {
+                return value.lastIndexOf("]") == -1 && begin.contains(this.value) && value.lastIndexOf("=") <= value.length() - 1;
+            }
+
+            @Override
+            public void add(String value, List<String> list) {
+                super.add(value, list);
+                if (value.contains("=")) {
+                    String confirm = value.substring(value.lastIndexOf('=') + 1);
+                    String begin = value.substring(0, value.lastIndexOf('=') + 1);
+                    for (EntityType entityType : EntityType.values())
+                        if (entityType.name().toLowerCase().startsWith(confirm.toLowerCase()))
+                            list.add(begin + entityType.name());
+                }
+            }
+        }, Limit("limit=")
         //
         ;
 
@@ -59,7 +120,6 @@ public class PlayerTab extends AbstractTab {
         }
 
         public boolean check(String value, String begin) {
-//             && !begin.contains("..")
             return value.lastIndexOf("]") == -1 && begin.contains(this.value) && value.lastIndexOf("=") < value.length() - 1;
         }
 
