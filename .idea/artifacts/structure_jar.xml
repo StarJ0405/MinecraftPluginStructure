@@ -1,8 +1,8 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="structure:jar">
-    <output-path>D:/작업용/Minecraft/LostArk Discord/Structure/plugins</output-path>
+    <output-path>$PROJECT_DIR$/../../Minecraft/LostArk Discord/Structure/plugins</output-path>
     <root id="archive" name="structure.jar">
-      <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/plugin.yml" />
       <element id="module-output" name="structure" />
     </root>
   </artifact>
