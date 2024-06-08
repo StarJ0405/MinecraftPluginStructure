@@ -10,9 +10,9 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Core;
@@ -23,17 +23,17 @@ import shining.starj.structure.Listeners.AbstractEventListener;
 import shining.starj.structure.Predicates.CommandPredicate;
 import shining.starj.structure.Predicates.Conditions.*;
 import shining.starj.structure.Systems.MessageStore;
-import shining.starj.structure.Systems.PermissionStore;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 @Builder
 public class CommandPreprocessListener extends AbstractEventListener {
     // https://www.digminecraft.com/getting_started/target_selectors.php
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST,ignoreCancelled = true)
     public void Events(ServerCommandEvent e) {
         String msg = e.getCommand();
         String cmd = (msg.contains(" ") ? msg.split(" ")[0] : msg);
@@ -163,13 +163,13 @@ public class CommandPreprocessListener extends AbstractEventListener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST,ignoreCancelled = true)
     public void Events(PlayerCommandSendEvent e) {
         Player player = e.getPlayer();
         e.getCommands().removeIf(cmd -> !AbstractCommand.isOp(cmd, player) || !AbstractCommand.hasPermission(cmd, player));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST,ignoreCancelled = true)
     public void Events(PlayerCommandPreprocessEvent e) {
         String msg = e.getMessage();
         String cmd = (msg.contains(" ") ? msg.split(" ")[0] : msg).replace("/", "");
@@ -423,10 +423,5 @@ public class CommandPreprocessListener extends AbstractEventListener {
             } else throw new IncompleteCommandException(exceptionMessage);
         }
         return commandPredicateBuilder.scoreConditionList(scoreConditionList).build();
-    }
-
-    @EventHandler
-    public void Events(PlayerToggleSneakEvent e) {
-        Bukkit.broadcastMessage(PermissionStore.hasPermission(e.getPlayer(), "test") + "");
     }
 }
