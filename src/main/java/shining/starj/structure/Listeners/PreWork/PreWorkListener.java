@@ -1,39 +1,51 @@
-package shining.starj.structure.Listeners.Prework;
+package shining.starj.structure.Listeners.PreWork;
 
 import lombok.Builder;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.Furnace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Core;
 import shining.starj.structure.Exceptions.IncompleteCommandException;
 import shining.starj.structure.Exceptions.InvalidCommandArgsException;
 import shining.starj.structure.Exceptions.NotFoundPlayerException;
 import shining.starj.structure.Listeners.AbstractEventListener;
+import shining.starj.structure.Listeners.PreWork.Event.InventorySortEvent;
+import shining.starj.structure.Listeners.PreWork.Event.TimerEvent;
 import shining.starj.structure.Predicates.CommandPredicate;
 import shining.starj.structure.Predicates.Conditions.*;
 import shining.starj.structure.Systems.MessageStore;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Builder
-public class CommandPreprocessListener extends AbstractEventListener {
-    // https://www.digminecraft.com/getting_started/target_selectors.php
-
-    @EventHandler(priority = EventPriority.HIGHEST,ignoreCancelled = true)
+public class PreWorkListener extends AbstractEventListener {
+    /*
+     *  플레이어 targetSelector
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void Events(ServerCommandEvent e) {
         String msg = e.getCommand();
         String cmd = (msg.contains(" ") ? msg.split(" ")[0] : msg);
@@ -121,8 +133,7 @@ public class CommandPreprocessListener extends AbstractEventListener {
                         if (s.contains("@p")) {
                             if (s.equals("@p")) {
                                 List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
-                                if (players.isEmpty())
-                                    throw new NotFoundPlayerException();
+                                if (players.isEmpty()) throw new NotFoundPlayerException();
                                 builder.append(players.getFirst().getName());
                             } else {
                                 CommandPredicate predicate = getCommandPredicate(s, e.getCommand(), sender);
@@ -163,13 +174,7 @@ public class CommandPreprocessListener extends AbstractEventListener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST,ignoreCancelled = true)
-    public void Events(PlayerCommandSendEvent e) {
-        Player player = e.getPlayer();
-        e.getCommands().removeIf(cmd -> !AbstractCommand.isOp(cmd, player) || !AbstractCommand.hasPermission(cmd, player));
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST,ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void Events(PlayerCommandPreprocessEvent e) {
         String msg = e.getMessage();
         String cmd = (msg.contains(" ") ? msg.split(" ")[0] : msg).replace("/", "");
@@ -201,8 +206,7 @@ public class CommandPreprocessListener extends AbstractEventListener {
                                     if (predicate.test(p)) players.add(p);
 
                                 int num = predicate.getLimit() != null ? predicate.getLimit() : players.size();
-                                if (predicate.getLimit() != null)
-                                    players.sort(new Closest(sender));
+                                if (predicate.getLimit() != null) players.sort(new Closest(sender));
                                 for (Player p : players)
                                     if (num > 0) {
                                         StringBuilder copyBuilder = new StringBuilder(builder);
@@ -236,8 +240,7 @@ public class CommandPreprocessListener extends AbstractEventListener {
                                     for (Entity entity : world.getEntities())
                                         if (predicate.test(entity)) entities.add(entity);
                                 int num = predicate.getLimit() != null ? predicate.getLimit() : entities.size();
-                                if (predicate.getLimit() != null)
-                                    entities.sort(new Closest(sender));
+                                if (predicate.getLimit() != null) entities.sort(new Closest(sender));
                                 for (Entity entity : entities)
                                     if (num > 0) {
                                         StringBuilder copyBuilder = new StringBuilder(builder);
@@ -424,4 +427,287 @@ public class CommandPreprocessListener extends AbstractEventListener {
         }
         return commandPredicateBuilder.scoreConditionList(scoreConditionList).build();
     }
+
+    /*
+     * 플레이어 명령어 권한여부에따른 지급
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(PlayerCommandSendEvent e) {
+        Player player = e.getPlayer();
+        e.getCommands().removeIf(cmd -> !AbstractCommand.isOp(cmd, player) || !AbstractCommand.hasPermission(cmd, player));
+    }
+
+    /*
+     * 시간 관련
+     */
+    private void refillItems(Block block) {
+        Furnace furnace = (Furnace) block.getState();
+        furnace.getInventory().setFuel(new ItemStack(Material.LAVA_BUCKET));
+        furnace.getInventory().setResult(new ItemStack(Material.AIR));
+        ItemStack time = new ItemStack(Material.PORKCHOP, 64);
+        furnace.getInventory().setSmelting(time);
+    }
+
+    private Location getTimeLocation() {
+        Location loc = Bukkit.getWorlds().getFirst().getSpawnLocation().getBlock().getLocation().clone();
+        loc.setY(-64);
+        return loc;
+    }
+
+    private final Location timeLocation = getTimeLocation();
+
+    private boolean isCorrectLocation(Block block) {
+        return block.getLocation().equals(timeLocation);
+    }
+
+    private void removeFurnace(Block block) {
+        Location loc = block.getLocation();
+        Furnace furnace = (Furnace) block.getState();
+        furnace.getInventory().clear();
+        if (loc.getY() == -64) block.setType(Material.BEDROCK, true);
+        else {
+            block.setType(Material.AIR);
+            for (int x = -1; x <= 1; x++)
+                for (int y = -1; y <= 0; y++)
+                    for (int z = -1; z < 1; z++)
+                        if (x != 0 && y != 0 && z != 0) {
+                            Location now = block.getLocation().clone().add(x, y, z);
+                            if (now.getBlock().getType().equals(Material.BEDROCK))
+                                now.getBlock().setType(Material.AIR, true);
+                        }
+        }
+    }
+
+    private boolean isItem(ItemStack item) {
+        return true;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void Event(FurnaceSmeltEvent e) {
+        Block block = e.getBlock();
+        if (isItem(e.getResult())) if (isCorrectLocation(block)) {
+            refillItems(block);
+            Bukkit.getPluginManager().callEvent(new TimerEvent(block));
+        } else removeFurnace(block);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void Event(ServerLoadEvent e) {
+        for (int x = -1; x <= 1; x++)
+            for (int y = -1; y <= 0; y++)
+                for (int z = -1; z < 1; z++)
+                    if (x != 0 && y != 0 && z != 0)
+                        timeLocation.clone().add(x, y, z).getBlock().setType(Material.BEDROCK, true);
+        Block block = timeLocation.getBlock();
+        block.setType(Material.FURNACE);
+        block.getChunk().setForceLoaded(true);
+        refillItems(block);
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void Event(FurnaceBurnEvent e) {
+        Block block = e.getBlock();
+        if (isCorrectLocation(block)) refillItems(block);
+
+    }
+
+    /*
+     * 인벤토리 정리
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void Events(InventoryClickEvent e) {
+        Inventory inventory = e.getClickedInventory();
+        int slot = e.getSlot();
+        if (e.getClick().equals(ClickType.DOUBLE_CLICK) && e.getCurrentItem().getType().equals(Material.AIR)) {
+            List<ItemStack> itemStacks = null;
+            InventoryType inventoryType = e.getClickedInventory().getType();
+            switch (inventoryType) {
+                case PLAYER -> {
+                    if (slot < 9)
+                        itemStacks = new ArrayList<>(Arrays.stream(inventory.getContents()).toList().subList(0, 9).stream().filter(Objects::nonNull).toList());
+                    else if (slot < 36)
+                        itemStacks = new ArrayList<>(Arrays.stream(inventory.getContents()).toList().subList(9, 36).stream().filter(Objects::nonNull).toList());
+                }
+                case CHEST, ENDER_CHEST, SHULKER_BOX, BARREL ->
+                        itemStacks = new ArrayList<>(Arrays.stream(inventory.getContents()).filter(Objects::nonNull).toList());
+            }
+            if (itemStacks == null) return;
+            InventorySortEvent event = new InventorySortEvent(inventory, itemStacks, inventoryType);
+            Bukkit.getPluginManager().callEvent(event);
+            if (!event.isCanceled()) {
+                HashMap<ItemStack, Integer> map = new HashMap<>();
+                a:
+                for (ItemStack item : itemStacks) {
+                    List<ItemStack> keys = new ArrayList<>(map.keySet());
+                    for (ItemStack key : keys)
+                        if (key.isSimilar(item)) {
+                            int value = map.get(key);
+                            map.put(key, value + item.getAmount());
+                            continue a;
+                        }
+                    map.put(item, item.getAmount());
+                }
+                ItemStack[] content = inventory.getContents();
+                if (event.getInventoryType().equals(InventoryType.PLAYER)) {
+                    if (slot < 9) {
+                        for (int i = 0; i < 9; i++)
+                            content[i] = null;
+                        int i = 0;
+                        for (ItemStack key : map.keySet()) {
+                            int value = map.get(key);
+                            final int max = key.getMaxStackSize();
+                            while (value > 0) {
+                                if (value > max) {
+                                    value -= max;
+                                    key.setAmount(max);
+                                    content[i] = key.clone();
+                                    i++;
+                                } else {
+                                    key.setAmount(value);
+                                    content[i] = key.clone();
+                                    value = 0;
+                                    i++;
+                                }
+                            }
+                        }
+                    } else if (slot < 36) {
+                        for (int i = 9; i < 36; i++)
+                            content[i] = null;
+                        int i = 0;
+                        for (ItemStack key : map.keySet()) {
+                            int value = map.get(key);
+                            final int max = key.getMaxStackSize();
+                            while (value > 0) {
+                                if (value > max) {
+                                    value -= max;
+                                    key.setAmount(max);
+                                    content[9 + i] = key.clone();
+                                    i++;
+                                } else {
+                                    key.setAmount(value);
+                                    content[9 + i] = key.clone();
+                                    value = 0;
+                                    i++;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    content = new ItemStack[content.length];
+                    int i = 0;
+                    for (ItemStack key : map.keySet()) {
+                        int value = map.get(key);
+                        final int max = key.getMaxStackSize();
+                        while (value > 0) {
+                            if (value > max) {
+                                value -= max;
+                                key.setAmount(max);
+                                content[i] = key.clone();
+                                i++;
+                            } else {
+                                key.setAmount(value);
+                                content[i] = key.clone();
+                                value = 0;
+                                i++;
+                            }
+                        }
+                    }
+                }
+                inventory.setContents(content);
+            }
+        }
+//        Bukkit.broadcastMessage(e.getClick().equals(ClickType.DOUBLE_CLICK) + ", " + e.getCurrentItem() + " => " + e.getClickedInventory().getType().name() + "(" + e.getSlot() + ")");
+    }
+
+    /*
+     *  가방
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(EntityPickupItemEvent e) {
+        if (e.getEntityType().equals(EntityType.PLAYER)) {
+            Player player = (Player) e.getEntity();
+            Inventory inv = player.getInventory();
+            ItemStack[] contents = inv.getContents();
+            for (int i = 0; i < contents.length; i++) {
+                ItemStack item = contents[i];
+                if (item != null && item.getType().name().contains("SHULKER")) {
+
+                }
+            }
+        }
+    }
+
+    /*
+     * 상자 및 블럭 들기
+     */
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        Block block = e.getClickedBlock();
+        if (player.getInventory().getItemInMainHand().getType().equals(Material.AIR) && block != null && e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && player.isSneaking())
+            switch (block.getType()) {
+                case CHEST -> {
+                    Chest chest = (Chest) block.getState();
+                    ItemStack item = new ItemStack(Material.CHEST);
+                    ItemMeta meta = item.getItemMeta();
+                    PersistentDataContainer container = meta.getPersistentDataContainer();
+                    Inventory inv = chest.getInventory();
+                    // 나중에 ItemToString 와 ItemFromString 필요
+                    for (int i = 0; i < inv.getSize(); i++) {
+                        ItemStack now = inv.getItem(i);
+                        if (now == null)
+                            continue;
+                        container.set(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING, now.getType().name() + "," + now.getAmount());
+                    }
+                    container.set(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER, inv.getSize());
+                    item.setItemMeta(meta);
+                    player.getInventory().addItem(item);
+                    block.setType(Material.AIR, true);
+                    e.setCancelled(true);
+                }
+                case FURNACE, BLAST_FURNACE, SMOKER -> {
+
+                }
+                case BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
+
+                }
+                case ENDER_CHEST -> {
+                }
+            }
+
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(BlockPlaceEvent e) {
+        Player player = e.getPlayer();
+        ItemStack item = e.getItemInHand();
+        ItemMeta meta = item.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        if (container.has(new NamespacedKey(Core.getCore(), "size"))) {
+            final int size = container.get(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER);
+            switch (item.getType()) {
+                case CHEST -> {
+                    Block placed = e.getBlockPlaced();
+                    Chest chest = (Chest) placed.getState();
+                    Inventory inv = chest.getInventory();
+                    for (int i = 0; i < size; i++)
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
+                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
+                            Material material = Material.valueOf(values[0]);
+                            int amount = Integer.parseInt(values[1]);
+                            inv.setItem(i, new ItemStack(material, amount));
+                        }
+
+
+                }
+            }
+        }
+
+
+    }
+    /*
+     * 작물캐기
+     */
 }
