@@ -1,5 +1,6 @@
 package shining.starj.structure.Systems;
 
+import lombok.Builder;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
@@ -11,57 +12,44 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.UUID;
 
 public class AttributeModifiers extends Attributes {
-	protected final UUID uuid;
-	protected final String name;
-	protected final Operation operation;
-	protected final EquipmentSlot slot;
+    protected final UUID uuid;
+    protected final String name;
+    protected final Operation operation;
+    protected final EquipmentSlot slot;
 
-	public AttributeModifiers(Attribute attribute, double amount, UUID uuid, String name, Operation operation,
-			EquipmentSlot slot) {
-		super(attribute, amount);
-		this.uuid = uuid;
-		this.name = name;
-		this.operation = operation;
-		this.slot = slot;
-	}
+    @Builder
+    public AttributeModifiers(Attribute attribute, double amount, UUID uuid, String name, Operation operation,
+                              EquipmentSlot slot) {
+        super(attribute, amount);
+        this.uuid = uuid;
+        this.name = name;
+        this.operation = operation;
+        this.slot = slot;
+    }
 
-	public AttributeModifiers(Attribute attribute, double amount, UUID uuid, Operation operation, EquipmentSlot slot) {
-		this(attribute, amount, uuid, uuid.toString(), operation, slot);
-	}
+    private AttributeModifier getAttributeModifier() {
+        if (this.slot == null)
+            return new AttributeModifier(this.uuid, this.name, this.amount, this.operation);
+        else
+            return new AttributeModifier(this.uuid, this.name, this.amount, this.operation, this.slot);
+    }
 
-	public AttributeModifiers(Attribute attribute, double amount, Operation operation, EquipmentSlot slot) {
-		this(attribute, amount, UUID.randomUUID(), operation, slot);
-	}
+    @Override
+    public void apply(LivingEntity livingEntity) {
+        if (amount == 0)
+            livingEntity.getAttribute(this.attribute).removeModifier(getAttributeModifier());
+        else
+            livingEntity.getAttribute(this.attribute).addModifier(getAttributeModifier());
+    }
 
-	public AttributeModifiers(Attribute attribute, double amount, UUID uuid, String name, Operation operation) {
-		this(attribute, amount, uuid, name, operation, null);
-	}
-
-	public AttributeModifiers(Attribute attribute, double amount, UUID uuid, Operation operation) {
-		this(attribute, amount, uuid, uuid.toString(), operation, null);
-	}
-
-	public AttributeModifiers(Attribute attribute, double amount, Operation operation) {
-		this(attribute, amount, UUID.randomUUID(), operation);
-	}
-
-	private AttributeModifier getAttributeModifer() {
-		if (this.slot == null)
-			return new AttributeModifier(this.uuid, this.name, this.amount, this.operation);
-		else
-			return new AttributeModifier(this.uuid, this.name, this.amount, this.operation, this.slot);
-	}
-
-	@Override
-	public void apply(LivingEntity livingEntity) {
-		livingEntity.getAttribute(this.attribute).addModifier(getAttributeModifer());
-	}
-
-	public void apply(ItemStack item) {
-		if (item != null) {
-			ItemMeta meta = item.getItemMeta();
-			meta.addAttributeModifier(this.attribute, getAttributeModifer());
-			item.setItemMeta(meta);
-		}
-	}
+    public void apply(ItemStack item) {
+        if (item != null) {
+            ItemMeta meta = item.getItemMeta();
+            if (amount == 0)
+                meta.removeAttributeModifier(this.attribute, getAttributeModifier());
+            else
+                meta.addAttributeModifier(this.attribute, getAttributeModifier());
+            item.setItemMeta(meta);
+        }
+    }
 }

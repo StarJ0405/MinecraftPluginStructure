@@ -2,9 +2,9 @@ package shining.starj.structure.Listeners.PreWork;
 
 import lombok.Builder;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Furnace;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
@@ -16,9 +16,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.*;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerCommandSendEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.Inventory;
@@ -26,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Nullable;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Core;
 import shining.starj.structure.Exceptions.IncompleteCommandException;
@@ -33,11 +32,14 @@ import shining.starj.structure.Exceptions.InvalidCommandArgsException;
 import shining.starj.structure.Exceptions.NotFoundPlayerException;
 import shining.starj.structure.Listeners.AbstractEventListener;
 import shining.starj.structure.Listeners.PreWork.Event.InventorySortEvent;
+import shining.starj.structure.Listeners.PreWork.Event.MoveContainerEvent;
 import shining.starj.structure.Listeners.PreWork.Event.TimerEvent;
 import shining.starj.structure.Predicates.CommandPredicate;
 import shining.starj.structure.Predicates.Conditions.*;
+import shining.starj.structure.Systems.AttributeModifiers;
 import shining.starj.structure.Systems.MessageStore;
 
+import java.util.Comparator;
 import java.util.*;
 
 @Builder
@@ -479,7 +481,7 @@ public class PreWorkListener extends AbstractEventListener {
     }
 
     private boolean isItem(ItemStack item) {
-        return true;
+        return item.getType().equals(Material.PORKCHOP);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -519,7 +521,7 @@ public class PreWorkListener extends AbstractEventListener {
     public void Events(InventoryClickEvent e) {
         Inventory inventory = e.getClickedInventory();
         int slot = e.getSlot();
-        if (e.getClick().equals(ClickType.DOUBLE_CLICK) && e.getCurrentItem().getType().equals(Material.AIR)) {
+        if (e.getClick().equals(ClickType.DOUBLE_CLICK) && e.getCursor().getType().equals(Material.AIR) && e.getCurrentItem().getType().equals(Material.AIR)) {
             List<ItemStack> itemStacks = null;
             InventoryType inventoryType = e.getClickedInventory().getType();
             switch (inventoryType) {
@@ -646,37 +648,77 @@ public class PreWorkListener extends AbstractEventListener {
     public void Events(PlayerInteractEvent e) {
         Player player = e.getPlayer();
         Block block = e.getClickedBlock();
-        if (player.getInventory().getItemInMainHand().getType().equals(Material.AIR) && block != null && e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && player.isSneaking())
-            switch (block.getType()) {
-                case CHEST -> {
-                    Chest chest = (Chest) block.getState();
-                    ItemStack item = new ItemStack(Material.CHEST);
-                    ItemMeta meta = item.getItemMeta();
-                    PersistentDataContainer container = meta.getPersistentDataContainer();
-                    Inventory inv = chest.getInventory();
-                    // 나중에 ItemToString 와 ItemFromString 필요
-                    for (int i = 0; i < inv.getSize(); i++) {
-                        ItemStack now = inv.getItem(i);
-                        if (now == null)
-                            continue;
-                        container.set(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING, now.getType().name() + "," + now.getAmount());
-                    }
-                    container.set(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER, inv.getSize());
-                    item.setItemMeta(meta);
-                    player.getInventory().addItem(item);
-                    block.setType(Material.AIR, true);
-                    e.setCancelled(true);
+        if (player.getInventory().getItemInMainHand().getType().equals(Material.AIR) && block != null && e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && player.isSneaking()) {
+            MoveContainerEvent event = getMoveContainerEvent(block, player);
+            if (event != null && !event.isCancelled()) {
+                ItemStack result = event.getResult();
+                ItemMeta meta = result.getItemMeta();
+                PersistentDataContainer container = meta.getPersistentDataContainer();
+                List<ItemStack> stored = event.getStored();
+                // 나중에 ItemToString 와 ItemFromString 필요
+                for (int i = 0; i < stored.size(); i++) {
+                    ItemStack now = stored.get(i);
+                    if (now == null) continue;
+                    container.set(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING, now.getType().name() + "," + now.getAmount());
                 }
-                case FURNACE, BLAST_FURNACE, SMOKER -> {
-
-                }
-                case BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
-
-                }
-                case ENDER_CHEST -> {
-                }
+                container.set(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER, stored.size());
+                result.setItemMeta(meta);
+                event.getPlayer().getInventory().setItemInMainHand(result);
+                event.getBlock().setType(Material.AIR, true);
+                AttributeModifiers.builder().uuid(player.getUniqueId()).name(player.getName()).amount(-0.75).operation(AttributeModifier.Operation.ADD_SCALAR).attribute(Attribute.GENERIC_MOVEMENT_SPEED).build().apply(player);
+                e.setCancelled(true);
             }
+        }
+    }
 
+    @Nullable
+    private static MoveContainerEvent getMoveContainerEvent(Block block, Player player) {
+        MoveContainerEvent event = null;
+        switch (block.getType()) {
+            case CHEST ->
+                    event = new MoveContainerEvent(player, block, Arrays.asList(((Chest) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+            case BARREL ->
+                    event = new MoveContainerEvent(player, block, Arrays.asList(((Barrel) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+            case FURNACE -> {
+                Furnace furnace = (Furnace) block.getState();
+                ItemStack result = new ItemStack(block.getType());
+                ItemMeta meta = result.getItemMeta();
+                PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, furnace.getBurnTime());
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, furnace.getCookTime());
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, furnace.getCookTimeTotal());
+                result.setItemMeta(meta);
+                event = new MoveContainerEvent(player, block, Arrays.asList(furnace.getInventory().getContents()), result);
+            }
+            case BLAST_FURNACE -> {
+                BlastFurnace blastFurnace = (BlastFurnace) block.getState();
+                ItemStack result = new ItemStack(block.getType());
+                ItemMeta meta = result.getItemMeta();
+                PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, blastFurnace.getBurnTime());
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, blastFurnace.getCookTime());
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, blastFurnace.getCookTimeTotal());
+                result.setItemMeta(meta);
+                event = new MoveContainerEvent(player, block, Arrays.asList(blastFurnace.getInventory().getContents()), result);
+            }
+            case SMOKER -> {
+                Smoker smoker = (Smoker) block.getState();
+                ItemStack result = new ItemStack(block.getType());
+                ItemMeta meta = result.getItemMeta();
+                PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, smoker.getBurnTime());
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, smoker.getCookTime());
+                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, smoker.getCookTimeTotal());
+                result.setItemMeta(meta);
+                event = new MoveContainerEvent(player, block, Arrays.asList(smoker.getInventory().getContents()), result);
+            }
+            case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX ->
+                    event = new MoveContainerEvent(player, block, Arrays.asList(((ShulkerBox) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+            case ENDER_CHEST ->
+                    event = new MoveContainerEvent(player, block, new ArrayList<>(), new ItemStack(block.getType()));
+
+        }
+        return event;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -687,9 +729,9 @@ public class PreWorkListener extends AbstractEventListener {
         PersistentDataContainer container = meta.getPersistentDataContainer();
         if (container.has(new NamespacedKey(Core.getCore(), "size"))) {
             final int size = container.get(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER);
+            Block placed = e.getBlockPlaced();
             switch (item.getType()) {
                 case CHEST -> {
-                    Block placed = e.getBlockPlaced();
                     Chest chest = (Chest) placed.getState();
                     Inventory inv = chest.getInventory();
                     for (int i = 0; i < size; i++)
@@ -699,13 +741,107 @@ public class PreWorkListener extends AbstractEventListener {
                             int amount = Integer.parseInt(values[1]);
                             inv.setItem(i, new ItemStack(material, amount));
                         }
-
-
+                }
+                case BARREL -> {
+                    Barrel barrel = (Barrel) placed.getState();
+                    Inventory inv = barrel.getInventory();
+                    for (int i = 0; i < size; i++)
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
+                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
+                            Material material = Material.valueOf(values[0]);
+                            int amount = Integer.parseInt(values[1]);
+                            inv.setItem(i, new ItemStack(material, amount));
+                        }
+                }
+                case FURNACE -> {
+                    Furnace furnace = (Furnace) placed.getState();
+                    Inventory inv = furnace.getSnapshotInventory();
+                    for (int i = 0; i < size; i++)
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
+                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
+                            Material material = Material.valueOf(values[0]);
+                            int amount = Integer.parseInt(values[1]);
+                            inv.setItem(i, new ItemStack(material, amount));
+                        }
+                    if (container.has(new NamespacedKey(Core.getCore(), "burnTime")))
+                        furnace.setBurnTime(container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT));
+                    if (container.has(new NamespacedKey(Core.getCore(), "cookTime")))
+                        furnace.setCookTime(container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT));
+                    if (container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")))
+                        furnace.setCookTimeTotal(container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER));
+                    furnace.update(true, true);
+                }
+                case BLAST_FURNACE -> {
+                    BlastFurnace blastFurnace = (BlastFurnace) placed.getState();
+                    Inventory inv = blastFurnace.getSnapshotInventory();
+                    for (int i = 0; i < size; i++)
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
+                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
+                            Material material = Material.valueOf(values[0]);
+                            int amount = Integer.parseInt(values[1]);
+                            inv.setItem(i, new ItemStack(material, amount));
+                        }
+                    if (container.has(new NamespacedKey(Core.getCore(), "burnTime")))
+                        blastFurnace.setBurnTime(container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT));
+                    if (container.has(new NamespacedKey(Core.getCore(), "cookTime")))
+                        blastFurnace.setCookTime(container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT));
+                    if (container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")))
+                        blastFurnace.setCookTimeTotal(container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER));
+                    blastFurnace.update(true, true);
+                }
+                case SMOKER -> {
+                    Smoker smoker = (Smoker) placed.getState();
+                    Inventory inv = smoker.getSnapshotInventory();
+                    for (int i = 0; i < size; i++)
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
+                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
+                            Material material = Material.valueOf(values[0]);
+                            int amount = Integer.parseInt(values[1]);
+                            inv.setItem(i, new ItemStack(material, amount));
+                        }
+                    if (container.has(new NamespacedKey(Core.getCore(), "burnTime")))
+                        smoker.setBurnTime(container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT));
+                    if (container.has(new NamespacedKey(Core.getCore(), "cookTime")))
+                        smoker.setCookTime(container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT));
+                    if (container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")))
+                        smoker.setCookTimeTotal(container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER));
+                    smoker.update(true, true);
+                }
+                case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
+                    ShulkerBox shulkerBox = (ShulkerBox) placed.getState();
+                    Inventory inv = shulkerBox.getInventory();
+                    for (int i = 0; i < size; i++)
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
+                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
+                            Material material = Material.valueOf(values[0]);
+                            int amount = Integer.parseInt(values[1]);
+                            inv.setItem(i, new ItemStack(material, amount));
+                        }
+                }
+                case ENDER_CHEST -> {
                 }
             }
+            AttributeModifiers.builder().uuid(player.getUniqueId()).name(player.getName()).amount(0).operation(AttributeModifier.Operation.ADD_SCALAR).attribute(Attribute.GENERIC_MOVEMENT_SPEED).build().apply(player);
         }
+    }
 
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(PlayerItemHeldEvent e) {
+        Player player = e.getPlayer();
+        ItemStack heldItem = player.getInventory().getItemInMainHand();
+        ItemMeta meta = heldItem.getItemMeta();
+        if (meta != null) {
+            PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+            if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
+        }
+    }
 
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(PlayerSwapHandItemsEvent e) {
+        ItemStack mainHandItem = e.getOffHandItem();
+        ItemMeta meta = mainHandItem.getItemMeta();
+        PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+        if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
     }
     /*
      * 작물캐기
