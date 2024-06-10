@@ -12,8 +12,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
@@ -846,4 +846,41 @@ public class PreWorkListener extends AbstractEventListener {
     /*
      * 작물캐기
      */
+
+    /*
+     * 작물 보호
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events2(PlayerInteractEvent e) {
+        if (e.getAction().equals(Action.PHYSICAL) && e.getClickedBlock() != null && e.getClickedBlock().getType().equals(Material.FARMLAND))
+            e.setCancelled(true);
+    }
+
+    /*
+     * 폭발 보호
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(BlockExplodeEvent e) {
+        e.blockList().clear();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(EntityExplodeEvent e) {
+        e.blockList().clear();
+    }
+
+    /*
+     * 화염 보호
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(BlockIgniteEvent e) {
+        if (e.getCause().equals(BlockIgniteEvent.IgniteCause.SPREAD))
+            e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events(BlockBurnEvent e) {
+        e.setCancelled(true);
+    }
+
 }
