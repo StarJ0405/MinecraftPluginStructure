@@ -13,18 +13,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @Getter
-public class MoveContainerEvent extends Event implements Cancellable {
+public class ContainerPickupEvent extends Event implements Cancellable {
     private static final HandlerList HANDLER_LIST = new HandlerList();
     private boolean canceled;
     private final Player player;
     private final Block block;
-    @Setter
-    private List<ItemStack> stored;
+    private final List<ItemStack> stored;
     @Setter
     private ItemStack result;
 
 
-    public MoveContainerEvent(Player player, Block block, List<ItemStack> stored, ItemStack result) {
+    public ContainerPickupEvent(Player player, Block block, List<ItemStack> stored, ItemStack result) {
         this.player = player;
         this.block = block;
         this.stored = stored;

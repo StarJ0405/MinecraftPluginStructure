@@ -5,14 +5,19 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.*;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.*;
@@ -31,8 +36,9 @@ import shining.starj.structure.Exceptions.IncompleteCommandException;
 import shining.starj.structure.Exceptions.InvalidCommandArgsException;
 import shining.starj.structure.Exceptions.NotFoundPlayerException;
 import shining.starj.structure.Listeners.AbstractEventListener;
+import shining.starj.structure.Listeners.PreWork.Event.ContainerPickupEvent;
+import shining.starj.structure.Listeners.PreWork.Event.HarvestEvent;
 import shining.starj.structure.Listeners.PreWork.Event.InventorySortEvent;
-import shining.starj.structure.Listeners.PreWork.Event.MoveContainerEvent;
 import shining.starj.structure.Listeners.PreWork.Event.TimerEvent;
 import shining.starj.structure.Predicates.CommandPredicate;
 import shining.starj.structure.Predicates.Conditions.*;
@@ -649,8 +655,10 @@ public class PreWorkListener extends AbstractEventListener {
         Player player = e.getPlayer();
         Block block = e.getClickedBlock();
         if (player.getInventory().getItemInMainHand().getType().equals(Material.AIR) && block != null && e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && player.isSneaking()) {
-            MoveContainerEvent event = getMoveContainerEvent(block, player);
-            if (event != null && !event.isCancelled()) {
+            ContainerPickupEvent event = getMoveContainerEvent(block, player);
+            if (event == null) return;
+            Bukkit.getPluginManager().callEvent(event);
+            if (!event.isCancelled()) {
                 ItemStack result = event.getResult();
                 ItemMeta meta = result.getItemMeta();
                 PersistentDataContainer container = meta.getPersistentDataContainer();
@@ -672,13 +680,13 @@ public class PreWorkListener extends AbstractEventListener {
     }
 
     @Nullable
-    private static MoveContainerEvent getMoveContainerEvent(Block block, Player player) {
-        MoveContainerEvent event = null;
+    private static ContainerPickupEvent getMoveContainerEvent(Block block, Player player) {
+        ContainerPickupEvent event = null;
         switch (block.getType()) {
             case CHEST ->
-                    event = new MoveContainerEvent(player, block, Arrays.asList(((Chest) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+                    event = new ContainerPickupEvent(player, block, Arrays.asList(((Chest) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
             case BARREL ->
-                    event = new MoveContainerEvent(player, block, Arrays.asList(((Barrel) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+                    event = new ContainerPickupEvent(player, block, Arrays.asList(((Barrel) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
             case FURNACE -> {
                 Furnace furnace = (Furnace) block.getState();
                 ItemStack result = new ItemStack(block.getType());
@@ -688,7 +696,7 @@ public class PreWorkListener extends AbstractEventListener {
                 persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, furnace.getCookTime());
                 persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, furnace.getCookTimeTotal());
                 result.setItemMeta(meta);
-                event = new MoveContainerEvent(player, block, Arrays.asList(furnace.getInventory().getContents()), result);
+                event = new ContainerPickupEvent(player, block, Arrays.asList(furnace.getInventory().getContents()), result);
             }
             case BLAST_FURNACE -> {
                 BlastFurnace blastFurnace = (BlastFurnace) block.getState();
@@ -699,7 +707,7 @@ public class PreWorkListener extends AbstractEventListener {
                 persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, blastFurnace.getCookTime());
                 persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, blastFurnace.getCookTimeTotal());
                 result.setItemMeta(meta);
-                event = new MoveContainerEvent(player, block, Arrays.asList(blastFurnace.getInventory().getContents()), result);
+                event = new ContainerPickupEvent(player, block, Arrays.asList(blastFurnace.getInventory().getContents()), result);
             }
             case SMOKER -> {
                 Smoker smoker = (Smoker) block.getState();
@@ -710,12 +718,12 @@ public class PreWorkListener extends AbstractEventListener {
                 persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, smoker.getCookTime());
                 persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, smoker.getCookTimeTotal());
                 result.setItemMeta(meta);
-                event = new MoveContainerEvent(player, block, Arrays.asList(smoker.getInventory().getContents()), result);
+                event = new ContainerPickupEvent(player, block, Arrays.asList(smoker.getInventory().getContents()), result);
             }
             case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX ->
-                    event = new MoveContainerEvent(player, block, Arrays.asList(((ShulkerBox) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+                    event = new ContainerPickupEvent(player, block, Arrays.asList(((ShulkerBox) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
             case ENDER_CHEST ->
-                    event = new MoveContainerEvent(player, block, new ArrayList<>(), new ItemStack(block.getType()));
+                    event = new ContainerPickupEvent(player, block, new ArrayList<>(), new ItemStack(block.getType()));
 
         }
         return event;
@@ -843,15 +851,78 @@ public class PreWorkListener extends AbstractEventListener {
         PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
         if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
     }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events2(InventoryClickEvent e) {
+        ItemStack current = e.getCurrentItem();
+        ItemMeta currentItemMeta = current.getItemMeta();
+        if (currentItemMeta != null) {
+            PersistentDataContainer persistentDataContainer = currentItemMeta.getPersistentDataContainer();
+            if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
+        }
+        if (e.getClick().equals(ClickType.NUMBER_KEY)) {
+            Player player = (Player) e.getWhoClicked();
+            ItemStack hotBar = player.getInventory().getItem(e.getHotbarButton());
+            if (hotBar != null) {
+                ItemMeta hotBarItemMeta = hotBar.getItemMeta();
+                if (hotBarItemMeta != null) {
+                    PersistentDataContainer persistentDataContainer = hotBarItemMeta.getPersistentDataContainer();
+                    if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
+                }
+            }
+        }
+    }
+
     /*
      * 작물캐기
      */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void Events2(PlayerInteractEvent e) {
+        if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            Block clickedBlock = e.getClickedBlock();
+            if (clickedBlock != null) {
+                HarvestEvent event = null;
+                switch (clickedBlock.getType()) {
+                    case WHEAT -> {
+                        Ageable crops = (Ageable) clickedBlock.getBlockData();
+                        Bukkit.broadcastMessage(crops.getAge() + "");
+                        if (crops.getAge() == crops.getMaximumAge()) {
+                            List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.WHEAT)).length(1).build());
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.WHEAT_SEEDS)).min(0).max(3).build());
+                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).build();
+                        }
+                    }
+                }
+                if (event == null) return;
+                Bukkit.getPluginManager().callEvent(event);
+                if (!event.isCanceled()) {
+                    Block block = event.getBlock();
+                    Location loc = block.getLocation().clone().add(0.5, 0.25, 0.5);
+                    int exp = event.getExp();
+                    if (exp > 0) {
+                        ExperienceOrb experienceOrb = (ExperienceOrb) loc.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
+                        experienceOrb.setExperience(exp);
+                    }
+                    Random r = new Random();
+                    for (HarvestEvent.RangeItem rangeItem : event.getRangeItems())
+                        loc.getWorld().dropItem(loc, rangeItem.getItem());
+
+                    if (event.isRePlant() && event.getBlock().getState() instanceof Ageable) {
+                        Ageable ageable = (Ageable) block.getBlockData();
+                        ageable.setAge(0);
+                    } else
+                        block.setType(Material.AIR, true);
+                }
+            }
+        }
+    }
 
     /*
      * 작물 보호
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void Events2(PlayerInteractEvent e) {
+    public void Events3(PlayerInteractEvent e) {
         if (e.getAction().equals(Action.PHYSICAL) && e.getClickedBlock() != null && e.getClickedBlock().getType().equals(Material.FARMLAND))
             e.setCancelled(true);
     }
@@ -874,13 +945,6 @@ public class PreWorkListener extends AbstractEventListener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void Events(BlockIgniteEvent e) {
-        if (e.getCause().equals(BlockIgniteEvent.IgniteCause.SPREAD))
-            e.setCancelled(true);
+        if (e.getCause().equals(BlockIgniteEvent.IgniteCause.SPREAD)) e.setCancelled(true);
     }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void Events(BlockBurnEvent e) {
-        e.setCancelled(true);
-    }
-
 }
