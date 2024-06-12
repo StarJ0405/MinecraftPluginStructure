@@ -62,9 +62,7 @@ public class Items {
     }
 
     public static List<Items> values() {
-        final List<Items> list = new ArrayList<Items>();
-        list.addAll(Items.list);
-        return list;
+        return new ArrayList<Items>(Items.list);
     }
 
 }

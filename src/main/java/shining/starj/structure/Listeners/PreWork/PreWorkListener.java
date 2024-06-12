@@ -31,6 +31,8 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.Nullable;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Core;
@@ -44,6 +46,9 @@ import shining.starj.structure.Predicates.Conditions.*;
 import shining.starj.structure.Systems.AttributeModifiers;
 import shining.starj.structure.Systems.MessageStore;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.*;
 
@@ -666,8 +671,19 @@ public class PreWorkListener extends AbstractEventListener {
                 for (int i = 0; i < stored.size(); i++) {
                     ItemStack now = stored.get(i);
                     if (now == null) continue;
-                    container.set(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING, now.getType().name() + "," + now.getAmount());
+//                    container.set(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING, now.getType().name() + "," + now.getAmount());
+                    try {
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
+                        dataOutput.writeObject(now);
+                        dataOutput.close();
+                        container.set(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.BYTE_ARRAY, outputStream.toByteArray());
+                    } catch (Exception ignored) {
+
+                    }
                 }
+
+                container.set(new NamespacedKey(Core.getCore(), "inventory"), PersistentDataType.STRING, "");
                 container.set(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER, stored.size());
                 if (event instanceof FuelContainerPickupEvent fuelEvent) {
                     container.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, fuelEvent.getBurnTime());
@@ -724,23 +740,29 @@ public class PreWorkListener extends AbstractEventListener {
                 case CHEST, BARREL, SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
                     List<ItemStack> stored = new ArrayList<>();
                     for (int i = 0; i < size; i++)
-                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
-                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
-                            Material material = Material.valueOf(values[0]);
-                            int amount = Integer.parseInt(values[1]);
-                            stored.add(new ItemStack(material, amount));
-                        } else stored.add(new ItemStack(Material.AIR));
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) try {
+                            ByteArrayInputStream inputStream = new ByteArrayInputStream(container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.BYTE_ARRAY));
+                            BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+                            stored.add((ItemStack) dataInput.readObject());
+                            dataInput.close();
+                        } catch (ClassNotFoundException | IOException ignored) {
+
+                        }
+                        else stored.add(new ItemStack(Material.AIR));
                     event = new ContainerPlaceEvent(player, item, e.getBlockPlaced(), stored);
                 }
                 case FURNACE, BLAST_FURNACE, SMOKER -> {
                     List<ItemStack> stored = new ArrayList<>();
                     for (int i = 0; i < size; i++)
-                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
-                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
-                            Material material = Material.valueOf(values[0]);
-                            int amount = Integer.parseInt(values[1]);
-                            stored.add(new ItemStack(material, amount));
-                        } else stored.add(new ItemStack(Material.AIR));
+                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) try {
+                            ByteArrayInputStream inputStream = new ByteArrayInputStream(container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.BYTE_ARRAY));
+                            BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+                            stored.add((ItemStack) dataInput.readObject());
+                            dataInput.close();
+                        } catch (ClassNotFoundException | IOException ignored) {
+
+                        }
+                        else stored.add(new ItemStack(Material.AIR));
                     short burnTime = container.has(new NamespacedKey(Core.getCore(), "burnTime")) ? burnTime = container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT) : 0;
                     short cookTime = container.has(new NamespacedKey(Core.getCore(), "cookTime")) ? container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT) : 0;
                     int cookTimeTotal = container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")) ? container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER) : 0;

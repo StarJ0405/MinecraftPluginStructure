@@ -1,7 +1,10 @@
 package shining.starj.structure.Commands;
 
+import lombok.Builder;
+import net.minecraft.server.commands.ItemCommands;
 import org.bukkit.command.*;
 import org.jetbrains.annotations.NotNull;
+import shining.starj.structure.Commands.Prework.ItemCommand;
 import shining.starj.structure.Commands.Prework.PermissionCommand;
 import shining.starj.structure.Commands.Prework.SudoCommand;
 import shining.starj.structure.Core;
@@ -29,7 +32,6 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
     protected AbstractCommand(String cmd, boolean isOp, AbstractCommandLine[] lines, AbstractTab... tabs) {
         this(cmd, null, isOp, lines, tabs);
     }
-
     protected AbstractCommand(String cmd, String permission, boolean isOp, AbstractCommandLine[] lines, AbstractTab... tabs) {
         PluginCommand command = Core.getCore().getCommand(cmd);
         command.setExecutor(this);
@@ -84,6 +86,7 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
     public static void initial() {
         new SudoCommand();
         new PermissionCommand();
+        new ItemCommand();
     }
 
 }

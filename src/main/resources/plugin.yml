@@ -6,13 +6,20 @@ api-version: 1.20
 author: StarJ
 
 commands:
+  item:
+    description: "전용 아이템을 제공하는 명령어"
+    usage: "/item [player] [item] (count)"
+    aliases: [i]
+    operator: admin
   sudo:
     description: "명령어를 강제로 시키는 명령어"
     usage: "/sudo [player] [..args]"
+    operator: admin
   permission:
     description: "퍼미션 명령어"
     usage: "/permission [player] add [permission] (ticks)\n/permission [player] remove [permission]"
     aliases: [p]
+    operator: admin
 
 preset:
   commands:
