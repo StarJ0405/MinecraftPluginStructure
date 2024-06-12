@@ -14,35 +14,15 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ContainerPlaceEvent extends Event implements Cancellable {
-    private static final HandlerList HANDLER_LIST = new HandlerList();
-    private boolean canceled;
-    private final Player player;
-    private ItemStack item;
-    private Block placedBlock;
-    private List<ItemStack> stored;
+public class FuelContainerPlaceEvent extends ContainerPlaceEvent {
+    private short burnTime;
+    private short cookTime;
+    private int cookTimeTotal;
 
-    public ContainerPlaceEvent(Player player, ItemStack item, Block placedBlock, List<ItemStack> stored) {
-        this.player = player;
-        this.item = item;
-        this.placedBlock = placedBlock;
-        this.stored = stored;
-        this.canceled = false;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return canceled;
-    }
-
-    @Override
-    public void setCancelled(boolean canceled) {
-        this.canceled = canceled;
-    }
-
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return HANDLER_LIST;
+    public FuelContainerPlaceEvent(Player player, ItemStack item, Block placedBlock, List<ItemStack> stored, short burnTime, short cookTime, int cookTimeTotal) {
+        super(player, item, placedBlock, stored);
+        this.burnTime = burnTime;
+        this.cookTime = cookTime;
+        this.cookTimeTotal = cookTimeTotal;
     }
 }

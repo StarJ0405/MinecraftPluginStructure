@@ -8,6 +8,7 @@ import org.bukkit.block.*;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
@@ -26,6 +27,7 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -36,10 +38,7 @@ import shining.starj.structure.Exceptions.IncompleteCommandException;
 import shining.starj.structure.Exceptions.InvalidCommandArgsException;
 import shining.starj.structure.Exceptions.NotFoundPlayerException;
 import shining.starj.structure.Listeners.AbstractEventListener;
-import shining.starj.structure.Listeners.PreWork.Event.ContainerPickupEvent;
-import shining.starj.structure.Listeners.PreWork.Event.HarvestEvent;
-import shining.starj.structure.Listeners.PreWork.Event.InventorySortEvent;
-import shining.starj.structure.Listeners.PreWork.Event.TimerEvent;
+import shining.starj.structure.Listeners.PreWork.Event.*;
 import shining.starj.structure.Predicates.CommandPredicate;
 import shining.starj.structure.Predicates.Conditions.*;
 import shining.starj.structure.Systems.AttributeModifiers;
@@ -659,7 +658,7 @@ public class PreWorkListener extends AbstractEventListener {
             if (event == null) return;
             Bukkit.getPluginManager().callEvent(event);
             if (!event.isCancelled()) {
-                ItemStack result = event.getResult();
+                ItemStack result = new ItemStack(event.getBlock().getType());
                 ItemMeta meta = result.getItemMeta();
                 PersistentDataContainer container = meta.getPersistentDataContainer();
                 List<ItemStack> stored = event.getStored();
@@ -670,6 +669,11 @@ public class PreWorkListener extends AbstractEventListener {
                     container.set(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING, now.getType().name() + "," + now.getAmount());
                 }
                 container.set(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER, stored.size());
+                if (event instanceof FuelContainerPickupEvent fuelEvent) {
+                    container.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, fuelEvent.getBurnTime());
+                    container.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, fuelEvent.getCookTime());
+                    container.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, fuelEvent.getCookTimeTotal());
+                }
                 result.setItemMeta(meta);
                 event.getPlayer().getInventory().setItemInMainHand(result);
                 event.getBlock().setType(Material.AIR, true);
@@ -684,46 +688,24 @@ public class PreWorkListener extends AbstractEventListener {
         ContainerPickupEvent event = null;
         switch (block.getType()) {
             case CHEST ->
-                    event = new ContainerPickupEvent(player, block, Arrays.asList(((Chest) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+                    event = new ContainerPickupEvent(player, block, Arrays.asList(((Chest) block.getState()).getInventory().getContents()));
             case BARREL ->
-                    event = new ContainerPickupEvent(player, block, Arrays.asList(((Barrel) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
+                    event = new ContainerPickupEvent(player, block, Arrays.asList(((Barrel) block.getState()).getInventory().getContents()));
             case FURNACE -> {
                 Furnace furnace = (Furnace) block.getState();
-                ItemStack result = new ItemStack(block.getType());
-                ItemMeta meta = result.getItemMeta();
-                PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, furnace.getBurnTime());
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, furnace.getCookTime());
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, furnace.getCookTimeTotal());
-                result.setItemMeta(meta);
-                event = new ContainerPickupEvent(player, block, Arrays.asList(furnace.getInventory().getContents()), result);
+                event = new FuelContainerPickupEvent(player, block, Arrays.asList(furnace.getInventory().getContents()), furnace.getBurnTime(), furnace.getCookTime(), furnace.getCookTimeTotal());
             }
             case BLAST_FURNACE -> {
                 BlastFurnace blastFurnace = (BlastFurnace) block.getState();
-                ItemStack result = new ItemStack(block.getType());
-                ItemMeta meta = result.getItemMeta();
-                PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, blastFurnace.getBurnTime());
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, blastFurnace.getCookTime());
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, blastFurnace.getCookTimeTotal());
-                result.setItemMeta(meta);
-                event = new ContainerPickupEvent(player, block, Arrays.asList(blastFurnace.getInventory().getContents()), result);
+                event = new FuelContainerPickupEvent(player, block, Arrays.asList(blastFurnace.getInventory().getContents()), blastFurnace.getBurnTime(), blastFurnace.getCookTime(), blastFurnace.getCookTimeTotal());
             }
             case SMOKER -> {
                 Smoker smoker = (Smoker) block.getState();
-                ItemStack result = new ItemStack(block.getType());
-                ItemMeta meta = result.getItemMeta();
-                PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, smoker.getBurnTime());
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, smoker.getCookTime());
-                persistentDataContainer.set(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER, smoker.getCookTimeTotal());
-                result.setItemMeta(meta);
-                event = new ContainerPickupEvent(player, block, Arrays.asList(smoker.getInventory().getContents()), result);
+                event = new FuelContainerPickupEvent(player, block, Arrays.asList(smoker.getInventory().getContents()), smoker.getBurnTime(), smoker.getCookTime(), smoker.getCookTimeTotal());
             }
             case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX ->
-                    event = new ContainerPickupEvent(player, block, Arrays.asList(((ShulkerBox) block.getState()).getInventory().getContents()), new ItemStack(block.getType()));
-            case ENDER_CHEST ->
-                    event = new ContainerPickupEvent(player, block, new ArrayList<>(), new ItemStack(block.getType()));
+                    event = new ContainerPickupEvent(player, block, Arrays.asList(((ShulkerBox) block.getState()).getInventory().getContents()));
+            case ENDER_CHEST -> event = new ContainerPickupEvent(player, block, new ArrayList<>());
 
         }
         return event;
@@ -737,99 +719,86 @@ public class PreWorkListener extends AbstractEventListener {
         PersistentDataContainer container = meta.getPersistentDataContainer();
         if (container.has(new NamespacedKey(Core.getCore(), "size"))) {
             final int size = container.get(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER);
-            Block placed = e.getBlockPlaced();
+            ContainerPlaceEvent event = null;
             switch (item.getType()) {
-                case CHEST -> {
-                    Chest chest = (Chest) placed.getState();
-                    Inventory inv = chest.getInventory();
+                case CHEST, BARREL, SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
+                    List<ItemStack> stored = new ArrayList<>();
                     for (int i = 0; i < size; i++)
                         if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
                             String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
                             Material material = Material.valueOf(values[0]);
                             int amount = Integer.parseInt(values[1]);
-                            inv.setItem(i, new ItemStack(material, amount));
-                        }
+                            stored.add(new ItemStack(material, amount));
+                        } else stored.add(new ItemStack(Material.AIR));
+                    event = new ContainerPlaceEvent(player, item, e.getBlockPlaced(), stored);
                 }
-                case BARREL -> {
-                    Barrel barrel = (Barrel) placed.getState();
-                    Inventory inv = barrel.getInventory();
+                case FURNACE, BLAST_FURNACE, SMOKER -> {
+                    List<ItemStack> stored = new ArrayList<>();
                     for (int i = 0; i < size; i++)
                         if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
                             String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
                             Material material = Material.valueOf(values[0]);
                             int amount = Integer.parseInt(values[1]);
-                            inv.setItem(i, new ItemStack(material, amount));
-                        }
+                            stored.add(new ItemStack(material, amount));
+                        } else stored.add(new ItemStack(Material.AIR));
+                    short burnTime = container.has(new NamespacedKey(Core.getCore(), "burnTime")) ? burnTime = container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT) : 0;
+                    short cookTime = container.has(new NamespacedKey(Core.getCore(), "cookTime")) ? container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT) : 0;
+                    int cookTimeTotal = container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")) ? container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER) : 0;
+                    event = new FuelContainerPlaceEvent(player, item, e.getBlockPlaced(), stored, burnTime, cookTime, cookTimeTotal);
                 }
-                case FURNACE -> {
-                    Furnace furnace = (Furnace) placed.getState();
-                    Inventory inv = furnace.getSnapshotInventory();
-                    for (int i = 0; i < size; i++)
-                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
-                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
-                            Material material = Material.valueOf(values[0]);
-                            int amount = Integer.parseInt(values[1]);
-                            inv.setItem(i, new ItemStack(material, amount));
-                        }
-                    if (container.has(new NamespacedKey(Core.getCore(), "burnTime")))
-                        furnace.setBurnTime(container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT));
-                    if (container.has(new NamespacedKey(Core.getCore(), "cookTime")))
-                        furnace.setCookTime(container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT));
-                    if (container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")))
-                        furnace.setCookTimeTotal(container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER));
-                    furnace.update(true, true);
-                }
-                case BLAST_FURNACE -> {
-                    BlastFurnace blastFurnace = (BlastFurnace) placed.getState();
-                    Inventory inv = blastFurnace.getSnapshotInventory();
-                    for (int i = 0; i < size; i++)
-                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
-                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
-                            Material material = Material.valueOf(values[0]);
-                            int amount = Integer.parseInt(values[1]);
-                            inv.setItem(i, new ItemStack(material, amount));
-                        }
-                    if (container.has(new NamespacedKey(Core.getCore(), "burnTime")))
-                        blastFurnace.setBurnTime(container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT));
-                    if (container.has(new NamespacedKey(Core.getCore(), "cookTime")))
-                        blastFurnace.setCookTime(container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT));
-                    if (container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")))
-                        blastFurnace.setCookTimeTotal(container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER));
-                    blastFurnace.update(true, true);
-                }
-                case SMOKER -> {
-                    Smoker smoker = (Smoker) placed.getState();
-                    Inventory inv = smoker.getSnapshotInventory();
-                    for (int i = 0; i < size; i++)
-                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
-                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
-                            Material material = Material.valueOf(values[0]);
-                            int amount = Integer.parseInt(values[1]);
-                            inv.setItem(i, new ItemStack(material, amount));
-                        }
-                    if (container.has(new NamespacedKey(Core.getCore(), "burnTime")))
-                        smoker.setBurnTime(container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT));
-                    if (container.has(new NamespacedKey(Core.getCore(), "cookTime")))
-                        smoker.setCookTime(container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT));
-                    if (container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")))
-                        smoker.setCookTimeTotal(container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER));
-                    smoker.update(true, true);
-                }
-                case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
-                    ShulkerBox shulkerBox = (ShulkerBox) placed.getState();
-                    Inventory inv = shulkerBox.getInventory();
-                    for (int i = 0; i < size; i++)
-                        if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) {
-                            String[] values = container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.STRING).split(",");
-                            Material material = Material.valueOf(values[0]);
-                            int amount = Integer.parseInt(values[1]);
-                            inv.setItem(i, new ItemStack(material, amount));
-                        }
-                }
-                case ENDER_CHEST -> {
-                }
+                case ENDER_CHEST ->
+                        event = new ContainerPlaceEvent(player, item, e.getBlockPlaced(), new ArrayList<>());
             }
-            AttributeModifiers.builder().uuid(player.getUniqueId()).name(player.getName()).amount(0).operation(AttributeModifier.Operation.ADD_SCALAR).attribute(Attribute.GENERIC_MOVEMENT_SPEED).build().apply(player);
+            if (!event.isCanceled()) {
+                Block placed = event.getPlacedBlock();
+                switch (placed.getType()) {
+                    case CHEST -> {
+                        Chest chest = (Chest) placed.getState();
+                        chest.getInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                    }
+                    case BARREL -> {
+                        Barrel barrel = (Barrel) placed.getState();
+                        barrel.getInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                    }
+                    case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
+                        ShulkerBox shulkerBox = (ShulkerBox) placed.getState();
+                        shulkerBox.getInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                    }
+                    case FURNACE -> {
+                        Furnace furnace = (Furnace) placed.getState();
+                        furnace.getSnapshotInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                        if (event instanceof FuelContainerPlaceEvent fuelEvent) {
+                            furnace.setBurnTime(fuelEvent.getBurnTime());
+                            furnace.setCookTime(fuelEvent.getCookTime());
+                            furnace.setCookTimeTotal(fuelEvent.getCookTimeTotal());
+                            furnace.update(true, true);
+                        }
+                    }
+                    case BLAST_FURNACE -> {
+                        BlastFurnace blastFurnace = (BlastFurnace) placed.getState();
+                        blastFurnace.getSnapshotInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                        if (event instanceof FuelContainerPlaceEvent fuelEvent) {
+                            blastFurnace.setBurnTime(fuelEvent.getBurnTime());
+                            blastFurnace.setCookTime(fuelEvent.getCookTime());
+                            blastFurnace.setCookTimeTotal(fuelEvent.getCookTimeTotal());
+                            blastFurnace.update(true, true);
+                        }
+                    }
+                    case SMOKER -> {
+                        Smoker smoker = (Smoker) placed.getState();
+                        smoker.getSnapshotInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                        if (event instanceof FuelContainerPlaceEvent fuelEvent) {
+                            smoker.setBurnTime(fuelEvent.getBurnTime());
+                            smoker.setCookTime(fuelEvent.getCookTime());
+                            smoker.setCookTimeTotal(fuelEvent.getCookTimeTotal());
+                            smoker.update(true, true);
+                        }
+                    }
+                    case ENDER_CHEST -> {
+                    }
+                }
+                AttributeModifiers.builder().uuid(player.getUniqueId()).name(player.getName()).amount(0).operation(AttributeModifier.Operation.ADD_SCALAR).attribute(Attribute.GENERIC_MOVEMENT_SPEED).build().apply(player);
+            } else e.setCancelled(true);
         }
     }
 
@@ -878,25 +847,84 @@ public class PreWorkListener extends AbstractEventListener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void Events2(PlayerInteractEvent e) {
-        if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+        ItemStack item = e.getItem();
+        if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && item != null && item.getType().name().contains("HOE")) {
             Block clickedBlock = e.getClickedBlock();
             if (clickedBlock != null) {
                 HarvestEvent event = null;
                 switch (clickedBlock.getType()) {
                     case WHEAT -> {
                         Ageable crops = (Ageable) clickedBlock.getBlockData();
-                        Bukkit.broadcastMessage(crops.getAge() + "");
                         if (crops.getAge() == crops.getMaximumAge()) {
                             List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
-                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.WHEAT)).length(1).build());
-                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.WHEAT_SEEDS)).min(0).max(3).build());
-                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).build();
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.WHEAT)).length(1).fortune(true).build());
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.WHEAT_SEEDS)).min(0).max(3).fortune(true).build());
+                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
                         }
+                    }
+                    case CARROTS -> {
+                        Ageable crops = (Ageable) clickedBlock.getBlockData();
+                        if (crops.getAge() == crops.getMaximumAge()) {
+                            List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.CARROT)).min(1).max(4).fortune(true).build());
+                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                        }
+                    }
+                    case POTATOES -> {
+                        Ageable crops = (Ageable) clickedBlock.getBlockData();
+                        if (crops.getAge() == crops.getMaximumAge()) {
+                            List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.POTATO)).min(1).max(4).fortune(true).build());
+                            if (new Random().nextDouble() < 0.02d)
+                                rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.POISONOUS_POTATO)).length(1).fortune(false).build());
+                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                        }
+                    }
+                    case BEETROOTS -> {
+                        Ageable crops = (Ageable) clickedBlock.getBlockData();
+                        if (crops.getAge() == crops.getMaximumAge()) {
+                            List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.BEETROOT)).length(1).fortune(true).build());
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.BEETROOT_SEEDS)).min(1).max(4).fortune(true).build());
+                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                        }
+                    }
+                    case NETHER_WART -> {
+                        Ageable crops = (Ageable) clickedBlock.getBlockData();
+                        if (crops.getAge() == crops.getMaximumAge()) {
+                            List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.NETHER_WART)).min(2).max(4).fortune(true).build());
+                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                        }
+                    }
+                    case COCOA -> {
+                        Ageable crops = (Ageable) clickedBlock.getBlockData();
+                        if (crops.getAge() == crops.getMaximumAge()) {
+                            List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                            rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.COCOA_BEANS)).min(2).max(3).fortune(true).build());
+                            event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                        }
+                    }
+                    case MELON -> {
+                        List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                        rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.MELON_SLICE)).min(3).max(7).fortune(true).build());
+                        event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                    }
+                    case PUMPKIN -> {
+                        List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                        rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.PUMPKIN)).length(1).fortune(true).build());
+                        event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                    }
+                    case SUGAR_CANE -> {
+                        List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
+                        rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.SUGAR_CANE)).length(1).fortune(true).build());
+                        event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
                     }
                 }
                 if (event == null) return;
                 Bukkit.getPluginManager().callEvent(event);
                 if (!event.isCanceled()) {
+                    ItemStack hoe = event.getHoe();
                     Block block = event.getBlock();
                     Location loc = block.getLocation().clone().add(0.5, 0.25, 0.5);
                     int exp = event.getExp();
@@ -904,15 +932,24 @@ public class PreWorkListener extends AbstractEventListener {
                         ExperienceOrb experienceOrb = (ExperienceOrb) loc.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
                         experienceOrb.setExperience(exp);
                     }
-                    Random r = new Random();
-                    for (HarvestEvent.RangeItem rangeItem : event.getRangeItems())
-                        loc.getWorld().dropItem(loc, rangeItem.getItem());
 
-                    if (event.isRePlant() && event.getBlock().getState() instanceof Ageable) {
-                        Ageable ageable = (Ageable) block.getBlockData();
-                        ageable.setAge(0);
-                    } else
-                        block.setType(Material.AIR, true);
+                    int max = event.isFortune() ? hoe.getEnchantmentLevel(Enchantment.FORTUNE) : 0;
+                    for (HarvestEvent.RangeItem rangeItem : event.getRangeItems())
+                        loc.getWorld().dropItem(loc, rangeItem.getItem(max));
+                    block.setType(Material.AIR, true);
+
+                    PlayerItemDamageEvent playerItemDamageEvent = new PlayerItemDamageEvent(event.getPlayer(), hoe, 1);
+                    if (!playerItemDamageEvent.isCancelled()) {
+                        Damageable damageable = (Damageable) hoe.getItemMeta();
+                        int level = event.isUnbreaking() ? hoe.getEnchantmentLevel(Enchantment.UNBREAKING) : 0;
+                        double chance = new Random().nextDouble();
+                        if (chance < 1d / (1 + level) && !e.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
+                            damageable.setDamage(damageable.getDamage() + 1);
+                            int maxDurability = damageable.hasMaxDamage() ? damageable.getMaxDamage() : hoe.getType().getMaxDurability();
+                            if (damageable.getDamage() >= maxDurability) hoe.setAmount(0);
+                        }
+                        hoe.setItemMeta(damageable);
+                    }
                 }
             }
         }

@@ -19,16 +19,13 @@ public class ContainerPickupEvent extends Event implements Cancellable {
     private final Player player;
     private final Block block;
     private final List<ItemStack> stored;
-    @Setter
-    private ItemStack result;
 
 
-    public ContainerPickupEvent(Player player, Block block, List<ItemStack> stored, ItemStack result) {
+    public ContainerPickupEvent(Player player, Block block, List<ItemStack> stored) {
         this.player = player;
         this.block = block;
         this.stored = stored;
         this.canceled = false;
-        this.result = result;
     }
 
     @Override
