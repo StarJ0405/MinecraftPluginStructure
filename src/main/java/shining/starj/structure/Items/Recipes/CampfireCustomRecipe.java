@@ -11,11 +11,9 @@ import shining.starj.structure.Core;
 public class CampfireCustomRecipe extends CustomRecipe {
     protected final CampfireRecipe recipe;
 
-    public CampfireCustomRecipe(String key, ItemStack result, CookingBookCategory category, RecipeChoice choice,
-                                float exp, int cookingTime) {
-        super(key, result);
-        this.recipe = new CampfireRecipe(new NamespacedKey(Core.getCore(), this.key), this.result, choice, exp,
-                cookingTime);
+    public CampfireCustomRecipe(String key, ItemStack result, CookingBookCategory category, RecipeChoice choice, float exp, int cookingTime) {
+        super(key);
+        this.recipe = new CampfireRecipe(new NamespacedKey(Core.getCore(), this.key), result, choice, exp, cookingTime);
         recipe.setInputChoice(choice);
         recipe.setCategory(category);
         Bukkit.addRecipe(recipe);

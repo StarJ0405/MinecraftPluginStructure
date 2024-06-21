@@ -1,6 +1,5 @@
 package shining.starj.structure.Items.Recipes;
 
-import lombok.Builder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -11,8 +10,6 @@ public abstract class CustomRecipe {
     protected final String key;
     protected final NamespacedKey namespacedKey;
 
-
-    @Builder
     public CustomRecipe(String key) {
         this.key = key;
         this.namespacedKey = new NamespacedKey(Core.getCore(), this.key);

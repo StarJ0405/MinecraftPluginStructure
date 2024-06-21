@@ -10,16 +10,16 @@ import shining.starj.structure.Core;
 
 public class BlastingCustomRecipe extends CustomRecipe {
     protected final BlastingRecipe recipe;
-    public BlastingCustomRecipe(String key, ItemStack result, CookingBookCategory category, RecipeChoice choice,
-                               float exp, int cookingTime) {
-        super(key, result);
-        this.recipe = new BlastingRecipe(new NamespacedKey(Core.getCore(), this.key), this.result, choice, exp,
-                cookingTime);
+
+    public BlastingCustomRecipe(String key, ItemStack result, CookingBookCategory category, RecipeChoice choice, float exp, int cookingTime) {
+        super(key);
+        this.recipe = new BlastingRecipe(new NamespacedKey(Core.getCore(), this.key), result, choice, exp, cookingTime);
         recipe.setInputChoice(choice);
         recipe.setCategory(category);
         Bukkit.addRecipe(recipe);
     }
-    public static void initial(){
+
+    public static void initial() {
 
     }
 }
