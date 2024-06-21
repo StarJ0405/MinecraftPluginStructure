@@ -15,16 +15,14 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -39,12 +37,15 @@ import shining.starj.structure.Core;
 import shining.starj.structure.Exceptions.IncompleteCommandException;
 import shining.starj.structure.Exceptions.InvalidCommandArgsException;
 import shining.starj.structure.Exceptions.NotFoundPlayerException;
+import shining.starj.structure.Items.BlockInteractableInterface;
+import shining.starj.structure.Items.Items;
 import shining.starj.structure.Listeners.AbstractEventListener;
 import shining.starj.structure.Listeners.PreWork.Event.*;
 import shining.starj.structure.Predicates.CommandPredicate;
 import shining.starj.structure.Predicates.Conditions.*;
 import shining.starj.structure.Systems.AttributeModifiers;
 import shining.starj.structure.Systems.MessageStore;
+import shining.starj.structure.Systems.MethodStore;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -57,7 +58,7 @@ public class PreWorkListener extends AbstractEventListener {
     /*
      *  플레이어 targetSelector
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(ServerCommandEvent e) {
         String msg = e.getCommand();
         String cmd = (msg.contains(" ") ? msg.split(" ")[0] : msg);
@@ -186,7 +187,7 @@ public class PreWorkListener extends AbstractEventListener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(PlayerCommandPreprocessEvent e) {
         String msg = e.getMessage();
         String cmd = (msg.contains(" ") ? msg.split(" ")[0] : msg).replace("/", "");
@@ -443,7 +444,7 @@ public class PreWorkListener extends AbstractEventListener {
     /*
      * 플레이어 명령어 권한여부에따른 지급
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(PlayerCommandSendEvent e) {
         Player player = e.getPlayer();
         e.getCommands().removeIf(cmd -> !AbstractCommand.isOp(cmd, player) || !AbstractCommand.hasPermission(cmd, player));
@@ -456,7 +457,8 @@ public class PreWorkListener extends AbstractEventListener {
         Furnace furnace = (Furnace) block.getState();
         furnace.getInventory().setFuel(new ItemStack(Material.LAVA_BUCKET));
         furnace.getInventory().setResult(new ItemStack(Material.AIR));
-        ItemStack time = new ItemStack(Material.PORKCHOP, 64);
+        ItemStack time = getTimer();
+        time.setAmount(60);
         furnace.getInventory().setSmelting(time);
     }
 
@@ -466,10 +468,8 @@ public class PreWorkListener extends AbstractEventListener {
         return loc;
     }
 
-    private final Location timeLocation = getTimeLocation();
-
     private boolean isCorrectLocation(Block block) {
-        return block.getLocation().equals(timeLocation);
+        return block.getLocation().equals(getTimeLocation());
     }
 
     private void removeFurnace(Block block) {
@@ -490,11 +490,15 @@ public class PreWorkListener extends AbstractEventListener {
         }
     }
 
-    private boolean isItem(ItemStack item) {
-        return item.getType().equals(Material.PORKCHOP);
+    private ItemStack getTimer() {
+        return Items.timer.getItemStack();
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    private boolean isItem(ItemStack item) {
+        return item.isSimilar(getTimer());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void Event(FurnaceSmeltEvent e) {
         Block block = e.getBlock();
         if (isItem(e.getResult())) if (isCorrectLocation(block)) {
@@ -503,11 +507,12 @@ public class PreWorkListener extends AbstractEventListener {
         } else removeFurnace(block);
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH)
     public void Event(ServerLoadEvent e) {
-        for (int x = -1; x <= 1; x++)
-            for (int y = -1; y <= 0; y++)
-                for (int z = -1; z < 1; z++)
+        Location timeLocation = getTimeLocation();
+        for (int x = -2; x <= 2; x++)
+            for (int y = 0; y <= 2; y++)
+                for (int z = -2; z < 2; z++)
                     if (x != 0 && y != 0 && z != 0)
                         timeLocation.clone().add(x, y, z).getBlock().setType(Material.BEDROCK, true);
         Block block = timeLocation.getBlock();
@@ -517,17 +522,16 @@ public class PreWorkListener extends AbstractEventListener {
     }
 
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH)
     public void Event(FurnaceBurnEvent e) {
         Block block = e.getBlock();
         if (isCorrectLocation(block)) refillItems(block);
-
     }
 
     /*
      * 인벤토리 정리
      */
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH)
     public void Events(InventoryClickEvent e) {
         Inventory inventory = e.getClickedInventory();
         int slot = e.getSlot();
@@ -635,7 +639,7 @@ public class PreWorkListener extends AbstractEventListener {
     /*
      *  가방
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(EntityPickupItemEvent e) {
         if (e.getEntityType().equals(EntityType.PLAYER)) {
             Player player = (Player) e.getEntity();
@@ -654,7 +658,7 @@ public class PreWorkListener extends AbstractEventListener {
      * 상자 및 블럭 들기
      */
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(PlayerInteractEvent e) {
         Player player = e.getPlayer();
         Block block = e.getClickedBlock();
@@ -667,7 +671,6 @@ public class PreWorkListener extends AbstractEventListener {
                 ItemMeta meta = result.getItemMeta();
                 PersistentDataContainer container = meta.getPersistentDataContainer();
                 List<ItemStack> stored = event.getStored();
-                // 나중에 ItemToString 와 ItemFromString 필요
                 for (int i = 0; i < stored.size(); i++) {
                     ItemStack now = stored.get(i);
                     if (now == null) continue;
@@ -727,7 +730,7 @@ public class PreWorkListener extends AbstractEventListener {
         return event;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(BlockPlaceEvent e) {
         Player player = e.getPlayer();
         ItemStack item = e.getItemInHand();
@@ -824,7 +827,7 @@ public class PreWorkListener extends AbstractEventListener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(PlayerItemHeldEvent e) {
         Player player = e.getPlayer();
         ItemStack heldItem = player.getInventory().getItemInMainHand();
@@ -835,30 +838,35 @@ public class PreWorkListener extends AbstractEventListener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(PlayerSwapHandItemsEvent e) {
         ItemStack mainHandItem = e.getOffHandItem();
-        ItemMeta meta = mainHandItem.getItemMeta();
-        PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
-        if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void Events2(InventoryClickEvent e) {
-        ItemStack current = e.getCurrentItem();
-        ItemMeta currentItemMeta = current.getItemMeta();
-        if (currentItemMeta != null) {
-            PersistentDataContainer persistentDataContainer = currentItemMeta.getPersistentDataContainer();
+        if (!mainHandItem.getType().equals(Material.AIR)) {
+            ItemMeta meta = mainHandItem.getItemMeta();
+            PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
             if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
         }
-        if (e.getClick().equals(ClickType.NUMBER_KEY)) {
-            Player player = (Player) e.getWhoClicked();
-            ItemStack hotBar = player.getInventory().getItem(e.getHotbarButton());
-            if (hotBar != null) {
-                ItemMeta hotBarItemMeta = hotBar.getItemMeta();
-                if (hotBarItemMeta != null) {
-                    PersistentDataContainer persistentDataContainer = hotBarItemMeta.getPersistentDataContainer();
-                    if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void Events2(InventoryClickEvent e) {
+        ItemStack current = e.getCurrentItem();
+        if (current != null) {
+            ItemMeta currentItemMeta = current.getItemMeta();
+            if (currentItemMeta != null) {
+                PersistentDataContainer persistentDataContainer = currentItemMeta.getPersistentDataContainer();
+                if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size"))) e.setCancelled(true);
+            }
+            if (e.getClick().equals(ClickType.NUMBER_KEY)) {
+                Player player = (Player) e.getWhoClicked();
+                ItemStack hotBar = player.getInventory().getItem(e.getHotbarButton());
+                if (hotBar != null) {
+                    ItemMeta hotBarItemMeta = hotBar.getItemMeta();
+                    if (hotBarItemMeta != null) {
+                        PersistentDataContainer persistentDataContainer = hotBarItemMeta.getPersistentDataContainer();
+                        if (persistentDataContainer.has(new NamespacedKey(Core.getCore(), "size")))
+                            e.setCancelled(true);
+                    }
                 }
             }
         }
@@ -867,13 +875,15 @@ public class PreWorkListener extends AbstractEventListener {
     /*
      * 작물캐기
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events2(PlayerInteractEvent e) {
         ItemStack item = e.getItem();
         if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && item != null && item.getType().name().contains("HOE")) {
             Block clickedBlock = e.getClickedBlock();
             if (clickedBlock != null) {
                 HarvestEvent event = null;
+
+
                 switch (clickedBlock.getType()) {
                     case WHEAT -> {
                         Ageable crops = (Ageable) clickedBlock.getBlockData();
@@ -934,13 +944,19 @@ public class PreWorkListener extends AbstractEventListener {
                     }
                     case PUMPKIN -> {
                         List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
-                        rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.PUMPKIN)).length(1).fortune(true).build());
-                        event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                        PersistentDataContainer container = clickedBlock.getChunk().getPersistentDataContainer();
+                        NamespacedKey key = new NamespacedKey(Core.getCore(), MethodStore.LocationToStringKey(clickedBlock.getLocation()));
+                        boolean fortune = container.has(key, PersistentDataType.BOOLEAN) ? container.get(key, PersistentDataType.BOOLEAN) : false;
+                        rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.PUMPKIN)).length(1).fortune(fortune).build());
+                        event = HarvestEvent.builder().player(e.getPlayer()).exp(fortune ? 1 : 0).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
                     }
                     case SUGAR_CANE -> {
                         List<HarvestEvent.RangeItem> rangeItems = new ArrayList<>();
-                        rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.SUGAR_CANE)).length(1).fortune(true).build());
-                        event = HarvestEvent.builder().player(e.getPlayer()).exp(1).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
+                        PersistentDataContainer container = clickedBlock.getChunk().getPersistentDataContainer();
+                        NamespacedKey key = new NamespacedKey(Core.getCore(), MethodStore.LocationToStringKey(clickedBlock.getLocation()));
+                        boolean fortune = container.has(key, PersistentDataType.BOOLEAN) ? container.get(key, PersistentDataType.BOOLEAN) : false;
+                        rangeItems.add(HarvestEvent.RangeItem.builder().item(new ItemStack(Material.SUGAR_CANE)).length(1).fortune(fortune).build());
+                        event = HarvestEvent.builder().player(e.getPlayer()).exp(fortune ? 1 : 0).block(clickedBlock).rangeItems(rangeItems).hoe(item).build();
                     }
                 }
                 if (event == null) return;
@@ -948,19 +964,21 @@ public class PreWorkListener extends AbstractEventListener {
                 if (!event.isCanceled()) {
                     ItemStack hoe = event.getHoe();
                     Block block = event.getBlock();
+                    Material type = block.getType();
                     Location loc = block.getLocation().clone().add(0.5, 0.25, 0.5);
                     int exp = event.getExp();
                     if (exp > 0) {
                         ExperienceOrb experienceOrb = (ExperienceOrb) loc.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
                         experienceOrb.setExperience(exp);
                     }
-
+                    block.getChunk().getPersistentDataContainer().remove(new NamespacedKey(Core.getCore(), MethodStore.LocationToStringKey(block.getLocation())));
                     int max = event.isFortune() ? hoe.getEnchantmentLevel(Enchantment.FORTUNE) : 0;
                     for (HarvestEvent.RangeItem rangeItem : event.getRangeItems())
                         loc.getWorld().dropItem(loc, rangeItem.getItem(max));
                     block.setType(Material.AIR, true);
 
                     PlayerItemDamageEvent playerItemDamageEvent = new PlayerItemDamageEvent(event.getPlayer(), hoe, 1);
+                    Bukkit.getPluginManager().callEvent(playerItemDamageEvent);
                     if (!playerItemDamageEvent.isCancelled()) {
                         Damageable damageable = (Damageable) hoe.getItemMeta();
                         int level = event.isUnbreaking() ? hoe.getEnchantmentLevel(Enchantment.UNBREAKING) : 0;
@@ -972,15 +990,50 @@ public class PreWorkListener extends AbstractEventListener {
                         }
                         hoe.setItemMeta(damageable);
                     }
+                    if (event.isRePlant()) {
+                        ReplantEvent replantEvent = null;
+                        switch (event.getBlock().getType()) {
+                            case WHEAT, CARROTS, POTATOES, BEETROOTS, COCOA, NETHER_WART ->
+                                    replantEvent = new ReplantAgeableEvent(event.getBlock(), type);
+                            case MELON, SUGAR_CANE, PUMPKIN -> replantEvent = new ReplantEvent(event.getBlock(), type);
+                        }
+                        if (replantEvent == null) return;
+
+                        Bukkit.getPluginManager().callEvent(replantEvent);
+                        if (!replantEvent.isCanceled()) {
+                            Block replantBlock = replantEvent.getBlock();
+                            replantBlock.setType(replantEvent.getResult(), true);
+                            if (replantEvent instanceof ReplantAgeableEvent) {
+                                Ageable ageable = (Ageable) block.getBlockData();
+                                ageable.setAge(((ReplantAgeableEvent) replantEvent).getAge());
+                                block.setBlockData(ageable);
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void Events(BlockGrowEvent e) {
+        Block block = e.getBlock();
+        PersistentDataContainer container = block.getChunk().getPersistentDataContainer();
+        container.set(new NamespacedKey(Core.getCore(), MethodStore.LocationToStringKey(block.getLocation())), PersistentDataType.BOOLEAN, true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void Events(BlockBreakEvent e) {
+        Block block = e.getBlock();
+        PersistentDataContainer container = block.getChunk().getPersistentDataContainer();
+        NamespacedKey key = new NamespacedKey(Core.getCore(), MethodStore.LocationToStringKey(block.getLocation()));
+        if (container.has(key, PersistentDataType.BOOLEAN)) container.remove(key);
+    }
+
     /*
      * 작물 보호
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events3(PlayerInteractEvent e) {
         if (e.getAction().equals(Action.PHYSICAL) && e.getClickedBlock() != null && e.getClickedBlock().getType().equals(Material.FARMLAND))
             e.setCancelled(true);
@@ -989,12 +1042,12 @@ public class PreWorkListener extends AbstractEventListener {
     /*
      * 폭발 보호
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(BlockExplodeEvent e) {
         e.blockList().clear();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(EntityExplodeEvent e) {
         e.blockList().clear();
     }
@@ -1002,8 +1055,47 @@ public class PreWorkListener extends AbstractEventListener {
     /*
      * 화염 보호
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void Events(BlockIgniteEvent e) {
         if (e.getCause().equals(BlockIgniteEvent.IgniteCause.SPREAD)) e.setCancelled(true);
+    }
+
+    /*
+     * 아이템 사용
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void Events4(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        ItemStack mainItem = player.getInventory().getItemInMainHand();
+        Items main = Items.valueOf(mainItem);
+        ItemStack offItem = player.getInventory().getItemInOffHand();
+        Items off = Items.valueOf(offItem);
+        if (e.getHand() != null)
+            if (e.getHand().equals(EquipmentSlot.HAND)) {
+                if (main instanceof BlockInteractableInterface interactable) {
+                    if (e.getAction().equals(Action.LEFT_CLICK_AIR) || e.getAction().equals(Action.LEFT_CLICK_BLOCK))
+                        e.setCancelled(interactable.left(player, mainItem, e.getClickedBlock()));
+                    else if (e.getAction().equals(Action.RIGHT_CLICK_AIR) || e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+                        e.setCancelled(interactable.right(player, mainItem, e.getClickedBlock()));
+                } else if (off instanceof BlockInteractableInterface interactable)
+                    if (e.getAction().equals(Action.LEFT_CLICK_AIR) || e.getAction().equals(Action.LEFT_CLICK_BLOCK))
+                        e.setCancelled(interactable.left(player, mainItem, e.getClickedBlock()));
+                    else if (e.getAction().equals(Action.RIGHT_CLICK_AIR) || e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+                        e.setCancelled(interactable.right(player, mainItem, e.getClickedBlock()));
+            } else if (e.getHand().equals(EquipmentSlot.OFF_HAND) && (main instanceof BlockInteractableInterface || off instanceof BlockInteractableInterface))
+                e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void Events2(PlayerSwapHandItemsEvent e) {
+        Player player = e.getPlayer();
+        ItemStack mainItem = e.getOffHandItem();
+        Items main = Items.valueOf(mainItem);
+        ItemStack offItem = e.getMainHandItem();
+        Items off = Items.valueOf(offItem);
+        if (main instanceof BlockInteractableInterface interactable)
+            e.setCancelled(interactable.swap(player, mainItem));
+        else if (off instanceof BlockInteractableInterface interactable)
+            e.setCancelled(interactable.swap(player, offItem));
     }
 }

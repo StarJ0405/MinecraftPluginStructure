@@ -10,11 +10,11 @@ import shining.starj.structure.Listeners.PreWork.Event.TimerEvent;
 public class TimeListener extends AbstractEventListener {
     // 20tick 마다 발동하는 시간 이벤트
     @EventHandler
-    public void Events(TimerEvent e){
+    public void Events(TimerEvent e) {
 
     }
 
-    // 시간이 스킵이 일어났을때 발생
+    // 시간이 스킵이 일어났을때 발생(침대, 명령어, 커스텀)
     @EventHandler
     public void Events(TimeSkipEvent e) {
 

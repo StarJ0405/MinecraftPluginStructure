@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import shining.starj.structure.Commands.AbstractCommand;
+import shining.starj.structure.Items.Items;
+import shining.starj.structure.Items.Recipes.CustomRecipe;
 import shining.starj.structure.Listeners.AbstractEventListener;
 
 public class Core extends JavaPlugin {
@@ -15,9 +17,10 @@ public class Core extends JavaPlugin {
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 시작되었습니다.");
         core = this;
         //
+        Items.values();
         AbstractCommand.initial(); // 명령어
         AbstractEventListener.initial(); // 이벤트
-
+        CustomRecipe.initial();
         //
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 정상적으로 불러와졌습니다.");
     }

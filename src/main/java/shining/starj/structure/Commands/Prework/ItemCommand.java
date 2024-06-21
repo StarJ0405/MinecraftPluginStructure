@@ -6,6 +6,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Commands.AbstractCommandLine;
@@ -36,14 +37,16 @@ public class ItemCommand extends AbstractCommand {
                 Player player = off.getPlayer();
                 Items i = Items.valueOf(args[1]);
                 if (i != null) {
-                    int count = 1;
+                    int amount = 1;
                     if (args.length == 3)
                         try {
-                            count = Integer.parseInt(args[2]);
+                            amount = Integer.parseInt(args[2]);
                         } catch (Exception ignored) {
 
                         }
-                    player.getInventory().addItem(i.getItemStack(player));
+                    ItemStack item = i.getItemStack(player);
+                    item.setAmount(amount);
+                    player.getInventory().addItem(item);
                     return true;
                 } else
                     MessageStore.sendMessage(sender, ChatColor.RED + "없는 아이템입니다.");
@@ -59,7 +62,7 @@ public class ItemCommand extends AbstractCommand {
 
     private static class items extends AbstractTab {
         public items() {
-            super(2, true);
+            super(1, true);
         }
 
         @Override

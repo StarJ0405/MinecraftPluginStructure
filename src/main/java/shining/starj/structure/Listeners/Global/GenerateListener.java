@@ -5,6 +5,7 @@ import org.bukkit.event.world.*;
 import shining.starj.structure.Listeners.AbstractEventListener;
 
 public class GenerateListener extends AbstractEventListener {
+    // 포탈 생성시 발생
     @EventHandler
     public void Events(PortalCreateEvent e) {
 

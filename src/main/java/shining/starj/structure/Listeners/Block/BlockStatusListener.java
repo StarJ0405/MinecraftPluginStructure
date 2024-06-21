@@ -36,6 +36,7 @@ public class BlockStatusListener extends AbstractEventListener {
 
     }
     // 스폰지가 물을 빨아들인 경우 발생
+    @EventHandler
     public void Events(SpongeAbsorbEvent e){
 
     }

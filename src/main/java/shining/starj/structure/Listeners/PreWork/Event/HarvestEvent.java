@@ -19,17 +19,18 @@ public class HarvestEvent extends Event implements Cancellable {
     private static final HandlerList HANDLER_LIST = new HandlerList();
     private boolean canceled;
     @Setter
-    private boolean fortune;
+    private boolean fortune; // 행운
     @Setter
-    private boolean unbreaking;
+    private boolean unbreaking; // 내구성
     private final Player player;
     private final Block block;
-    private final ItemStack hoe;
+    private final ItemStack hoe; // 괭이
     @Setter
     private int exp;
     private final List<RangeItem> rangeItems;
     @Setter
     private boolean rePlant;
+    private double damage; // 괭이데미지
 
     @Builder
     public HarvestEvent(Player player, Block block, ItemStack hoe, int exp, List<RangeItem> rangeItems) {
@@ -65,7 +66,7 @@ public class HarvestEvent extends Event implements Cancellable {
         private final ItemStack item;
         private final int min;
         private final int max;
-        private final boolean fortune;
+        private final boolean fortune; // 행운 여부
 
         @Builder
         public RangeItem(ItemStack item, Integer min, Integer max, Integer length, boolean fortune) {
