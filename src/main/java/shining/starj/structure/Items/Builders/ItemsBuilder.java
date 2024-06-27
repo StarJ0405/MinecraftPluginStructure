@@ -1,4 +1,4 @@
-package shining.starj.structure.Items.Builder;
+package shining.starj.structure.Items.Builders;
 
 import org.bukkit.Material;
 import shining.starj.structure.Items.Items;

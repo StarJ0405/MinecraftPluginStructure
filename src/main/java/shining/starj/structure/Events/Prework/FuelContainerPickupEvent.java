@@ -1,10 +1,11 @@
-package shining.starj.structure.Listeners.PreWork.Event;
+package shining.starj.structure.Events.Prework;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import shining.starj.structure.Events.Builder.FuelContainerPickupEventBuilder;
 
 import java.util.List;
 
@@ -22,4 +23,9 @@ public class FuelContainerPickupEvent extends ContainerPickupEvent {
         this.cookTimeTotal = cookTimeTotal;
     }
 
+    public static final FuelContainerPickupEventBuilder FuelContainerPickupEventBuilder = new FuelContainerPickupEventBuilder();
+
+    public static FuelContainerPickupEventBuilder builder() {
+        return FuelContainerPickupEventBuilder;
+    }
 }

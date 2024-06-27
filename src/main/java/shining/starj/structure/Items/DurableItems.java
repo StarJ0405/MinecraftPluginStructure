@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
-import shining.starj.structure.Items.Builder.DurableBuilder;
+import shining.starj.structure.Items.Builders.DurableItemsBuilder;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class DurableItems extends Items {
         return item;
     }
 
-    public static DurableBuilder builder() {
-        return new DurableBuilder();
+    public static DurableItemsBuilder builder() {
+        return new DurableItemsBuilder();
     }
 }

@@ -24,9 +24,15 @@ public abstract class CustomRecipe {
     }
 
     public static void initial() {
-        ShapelessCustomRecipe.initial();
-        ShapedCustomRecipe.initial();
+        BlastingCustomRecipe.initial();
+        CampfireCustomRecipe.initial();
         FurnaceCustomRecipe.initial();
-        SmithingCustomTransformRecipe.initial();
+        MerchantCustomRecipe.initial();
+        ShapedCustomRecipe.initial();
+        ShapelessCustomRecipe.initial();
+        SmithingTransformCustomRecipe.initial();
+        SmithingTrimCustomRecipe.initial();
+        SmokingCustomRecipe.initial();
+        StoneCuttingCustomRecipe.initial();
     }
 }

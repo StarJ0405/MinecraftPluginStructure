@@ -3,7 +3,7 @@ package shining.starj.structure.Listeners.Inventory;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.*;
 import shining.starj.structure.Listeners.AbstractEventListener;
-import shining.starj.structure.Listeners.PreWork.Event.InventorySortEvent;
+import shining.starj.structure.Events.Prework.InventorySortEvent;
 
 public class InventoryInteractListener extends AbstractEventListener {
     // 인벤토리가 열리면 발생

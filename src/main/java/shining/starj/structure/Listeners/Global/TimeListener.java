@@ -4,7 +4,7 @@ import lombok.Builder;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.TimeSkipEvent;
 import shining.starj.structure.Listeners.AbstractEventListener;
-import shining.starj.structure.Listeners.PreWork.Event.TimerEvent;
+import shining.starj.structure.Events.Prework.TimerEvent;
 
 @Builder
 public class TimeListener extends AbstractEventListener {

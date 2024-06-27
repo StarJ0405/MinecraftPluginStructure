@@ -1,23 +1,18 @@
-package shining.starj.structure.Listeners.PreWork.Event;
+package shining.starj.structure.Events.Prework;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import shining.starj.structure.Events.AbstractCancelableEvent;
 
 import java.util.List;
 import java.util.Random;
 
 @Getter
-public class HarvestEvent extends Event implements Cancellable {
-    private static final HandlerList HANDLER_LIST = new HandlerList();
-    private boolean canceled;
+public class HarvestEvent extends AbstractCancelableEvent {
     @Setter
     private boolean fortune; // 행운
     @Setter
@@ -34,7 +29,6 @@ public class HarvestEvent extends Event implements Cancellable {
 
     @Builder
     public HarvestEvent(Player player, Block block, ItemStack hoe, int exp, List<RangeItem> rangeItems) {
-        this.canceled = false;
         this.player = player;
         this.block = block;
         this.exp = exp;
@@ -43,22 +37,6 @@ public class HarvestEvent extends Event implements Cancellable {
         this.hoe = hoe;
         this.fortune = true;
         this.unbreaking = true;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return canceled;
-    }
-
-    @Override
-    public void setCancelled(boolean canceled) {
-        this.canceled = canceled;
-    }
-
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return HANDLER_LIST;
     }
 
     @Setter

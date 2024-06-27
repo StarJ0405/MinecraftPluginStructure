@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.FoodComponent;
-import shining.starj.structure.Items.Builder.ConsumableBuilder;
+import shining.starj.structure.Items.Builders.ConsumableItemsBuilder;
 
 import java.util.List;
 
@@ -39,8 +39,10 @@ public class ConsumableItems extends Items {
         return item;
     }
 
-    public static ConsumableBuilder builder() {
-        return new ConsumableBuilder();
+    public static final ConsumableItemsBuilder ConsumableItemsBuilder = new ConsumableItemsBuilder();
+
+    public static ConsumableItemsBuilder builder() {
+        return ConsumableItemsBuilder;
     }
 
 }

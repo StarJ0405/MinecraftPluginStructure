@@ -1,4 +1,4 @@
-package shining.starj.structure.Items.Builder;
+package shining.starj.structure.Items.Builders;
 
 import org.bukkit.Material;
 import shining.starj.structure.Items.DurableItems;
@@ -6,84 +6,84 @@ import shining.starj.structure.Items.DurableItems;
 import java.util.Arrays;
 import java.util.List;
 
-public class DurableBuilder extends ItemsBuilder {
+public class DurableItemsBuilder extends ItemsBuilder {
     protected int maxDurability;
     protected int durability;
 
     @Override
-    public DurableBuilder key(String key) {
+    public DurableItemsBuilder key(String key) {
         this.key = key;
         return this;
     }
 
     @Override
-    public DurableBuilder displayName(String displayName) {
+    public DurableItemsBuilder displayName(String displayName) {
         this.displayName = displayName;
         return this;
     }
 
     @Override
-    public DurableBuilder material(Material material) {
+    public DurableItemsBuilder material(Material material) {
         this.material = material;
         return this;
     }
 
     @Override
-    public DurableBuilder setLores(String... lores) {
+    public DurableItemsBuilder setLores(String... lores) {
         this.lores = Arrays.stream(lores).toList();
         return this;
     }
 
     @Override
-    public DurableBuilder addLores(String... lores) {
+    public DurableItemsBuilder addLores(String... lores) {
         this.lores.addAll(List.of(lores));
         return this;
     }
 
     @Override
-    public DurableBuilder addLore(String lore) {
+    public DurableItemsBuilder addLore(String lore) {
         this.lores.add(lore);
         return this;
     }
 
     @Override
-    public DurableBuilder getModel(int model) {
+    public DurableItemsBuilder getModel(int model) {
         this.model = model;
         return this;
     }
 
     @Override
-    public DurableBuilder isInteract(boolean interact) {
+    public DurableItemsBuilder isInteract(boolean interact) {
         this.interact = interact;
         return this;
     }
 
     @Override
-    public DurableBuilder isFireResistant(boolean fireResistant) {
+    public DurableItemsBuilder isFireResistant(boolean fireResistant) {
         this.fireResistant = fireResistant;
         return this;
     }
 
     @Override
-    public DurableBuilder isGlint(boolean glint) {
+    public DurableItemsBuilder isGlint(boolean glint) {
         this.glint = glint;
         return this;
     }
 
     @Override
-    public DurableBuilder isTooltip(boolean tooltip) {
+    public DurableItemsBuilder isTooltip(boolean tooltip) {
         this.tooltip = tooltip;
         return this;
     }
 
     @Override
-    public DurableBuilder isUnbreakable(boolean unbreakable) {
+    public DurableItemsBuilder isUnbreakable(boolean unbreakable) {
         this.unbreakable = unbreakable;
         return this;
     }
 
     @Override
-    public DurableBuilder setMaxStackSize(int maxStackSize) {
+    public DurableItemsBuilder setMaxStackSize(int maxStackSize) {
         this.maxStackSize = maxStackSize;
         return this;
     }

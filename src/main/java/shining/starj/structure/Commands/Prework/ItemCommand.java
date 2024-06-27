@@ -69,7 +69,8 @@ public class ItemCommand extends AbstractCommand {
         public List<String> getString(CommandSender sender, String value, String[] args) {
             final List<String> list = new ArrayList<>();
             for (Items item : Items.values())
-                list.add(item.getKey());
+                if (value.isBlank() || item.getKey().toLowerCase().contains(value.toLowerCase()))
+                    list.add(item.getKey());
             return list;
         }
     }
