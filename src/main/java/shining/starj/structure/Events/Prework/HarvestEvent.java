@@ -12,31 +12,28 @@ import java.util.List;
 import java.util.Random;
 
 @Getter
+@Setter
 public class HarvestEvent extends AbstractCancelableEvent {
-    @Setter
     private boolean fortune; // 행운
-    @Setter
     private boolean unbreaking; // 내구성
     private final Player player;
     private final Block block;
     private final ItemStack hoe; // 괭이
-    @Setter
     private int exp;
     private final List<RangeItem> rangeItems;
-    @Setter
     private boolean rePlant;
     private double damage; // 괭이데미지
-
     @Builder
-    public HarvestEvent(Player player, Block block, ItemStack hoe, int exp, List<RangeItem> rangeItems) {
+    public HarvestEvent(boolean fortune, boolean unbreaking, Player player, Block block, ItemStack hoe, int exp, List<RangeItem> rangeItems, boolean rePlant, double damage) {
+        this.fortune = fortune;
+        this.unbreaking = unbreaking;
         this.player = player;
         this.block = block;
+        this.hoe = hoe;
         this.exp = exp;
         this.rangeItems = rangeItems;
-        this.rePlant = false;
-        this.hoe = hoe;
-        this.fortune = true;
-        this.unbreaking = true;
+        this.rePlant = rePlant;
+        this.damage = damage;
     }
 
     @Setter

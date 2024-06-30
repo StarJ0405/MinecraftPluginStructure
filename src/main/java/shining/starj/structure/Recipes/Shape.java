@@ -1,4 +1,4 @@
-package shining.starj.structure.Items.Recipes;
+package shining.starj.structure.Recipes;
 
 import org.bukkit.inventory.RecipeChoice;
 

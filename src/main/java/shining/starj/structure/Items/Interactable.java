@@ -28,7 +28,7 @@ public interface Interactable {
         return false;
     }
 
-    default boolean pickup(Player player, ItemStack item, Item entity) {
+    default boolean pickup(Player player, ItemStack item, Item entity, int slot) {
         return false;
     }
 }

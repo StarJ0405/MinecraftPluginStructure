@@ -3,7 +3,7 @@ package shining.starj.structure.GUIs;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import shining.starj.structure.Items.Prework.Bags.InventorySize;
+import shining.starj.structure.Systems.InventorySize;
 
 public abstract class AbstractFrameGUI extends AbstractGUI {
     public AbstractFrameGUI(String key) {

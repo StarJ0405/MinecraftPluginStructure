@@ -1,7 +1,7 @@
-package shining.starj.structure.Items.Prework.Bags;
+package shining.starj.structure.Systems;
 
 public enum InventorySize {
-    One, Two, Three, Four, Five, Six
+    One, Two, Three
     //
     ;
 

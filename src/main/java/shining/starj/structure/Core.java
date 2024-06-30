@@ -8,7 +8,7 @@ import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Events.AbstractEvent;
 import shining.starj.structure.GUIs.AbstractGUI;
 import shining.starj.structure.Items.Items;
-import shining.starj.structure.Items.Recipes.CustomRecipe;
+import shining.starj.structure.Recipes.CustomRecipe;
 import shining.starj.structure.Listeners.AbstractEventListener;
 
 public class Core extends JavaPlugin {
@@ -20,7 +20,7 @@ public class Core extends JavaPlugin {
         core = this;
         //
         AbstractEvent.initial(); // 이벤트
-        Items.values(); // 아이템
+        Items.initial(); // 아이템
         AbstractCommand.initial(); // 명령어
         CustomRecipe.initial(); // 레시피
         AbstractGUI.initial(); // GUI

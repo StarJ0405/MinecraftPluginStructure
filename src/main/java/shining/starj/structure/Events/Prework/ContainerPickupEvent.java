@@ -1,13 +1,12 @@
 package shining.starj.structure.Events.Prework;
 
+import lombok.Builder;
 import lombok.Getter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import shining.starj.structure.Events.AbstractCancelableEvent;
-import shining.starj.structure.Events.Builder.ContainerPickupEventBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -16,15 +15,10 @@ public class ContainerPickupEvent extends AbstractCancelableEvent {
     private final Block block;
     private final List<ItemStack> stored;
 
+    @Builder
     public ContainerPickupEvent(Player player, Block block, List<ItemStack> stored) {
         this.player = player;
         this.block = block;
-        this.stored = stored != null ? stored : new ArrayList<>();
-    }
-
-    public final static ContainerPickupEventBuilder ContainerPickupEventBuilder = new ContainerPickupEventBuilder();
-
-    public static ContainerPickupEventBuilder builder() {
-        return ContainerPickupEventBuilder;
+        this.stored = stored;
     }
 }

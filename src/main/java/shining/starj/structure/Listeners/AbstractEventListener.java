@@ -4,10 +4,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import shining.starj.structure.Core;
-import shining.starj.structure.Listeners.PreWork.PreWorkListener;
+import shining.starj.structure.Listeners.PreWork.*;
+
 public abstract class AbstractEventListener implements Listener {
 
     private static final PluginManager plugin_manager = Bukkit.getPluginManager();
+
     public AbstractEventListener() {
         plugin_manager.registerEvents(this, Core.getCore());
     }
@@ -19,6 +21,14 @@ public abstract class AbstractEventListener implements Listener {
         // 플레이어
 
         // 사전 작업용
-        PreWorkListener.builder().build();
+        BasicProtectListener.builder().build();
+        BlockPickupListener.builder().build();
+        GUIListener.builder().build();
+        HarvestListener.builder().build();
+        InventorySortListener.builder().build();
+        ItemInteractListener.builder().build();
+        PermissionListener.builder().build();
+        TargetSelectorListener.builder().build();
+        TimerListener.builder().build();
     }
 }

@@ -20,7 +20,6 @@ public class InventorySortEvent extends AbstractCancelableEvent {
     private final InventoryType inventoryType;
     private final int rawSlot;
     private final int slot;
-
     @Builder
     public InventorySortEvent(Player player, InventoryView view, Inventory inventory, List<ItemStack> sorted, InventoryType inventoryType, int rawSlot, int slot) {
         this.player = player;

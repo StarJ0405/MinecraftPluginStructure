@@ -16,7 +16,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import shining.starj.structure.Core;
 import shining.starj.structure.GUIs.AbstractFrameGUI;
 import shining.starj.structure.Items.Items;
-import shining.starj.structure.Items.Prework.AbstractBagItem;
+import shining.starj.structure.Items.Prework.BagItem;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class BagGUI extends AbstractFrameGUI {
                 if (container.has(prevent)) return true;
             }
             Items item = Items.valueOf(held);
-            if (item instanceof AbstractBagItem bag && !bag.isAllow(currentItemStack)) return true;
+            if (item instanceof BagItem bag && !bag.isAllow(currentItemStack)) return true;
 
         }
         if (type.equals(ClickType.NUMBER_KEY)) {
@@ -50,11 +50,11 @@ public class BagGUI extends AbstractFrameGUI {
                 }
 
                 Items item = Items.valueOf(held);
-                if (item instanceof AbstractBagItem bag && !bag.isAllow(hotbar)) return true;
+                if (item instanceof BagItem bag && !bag.isAllow(hotbar)) return true;
             }
         }
         if (held != null && held.getType().name().contains("SHULKER")) {
-            if (held.getItemMeta() instanceof BlockStateMeta meta && meta.getBlockState() instanceof ShulkerBox box) {
+            if (held.getItemMeta() instanceof BlockStateMeta meta && meta.getBlockState() instanceof ShulkerBox box)
                 Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
                     box.getInventory().setContents(view.getTopInventory().getContents());
                     meta.setBlockState(box);
@@ -69,7 +69,6 @@ public class BagGUI extends AbstractFrameGUI {
                     held.setItemMeta(meta);
                     player.getInventory().setItem(player.getInventory().getHeldItemSlot(), held);
                 }, 1);
-            }
         }
 
         return false;
@@ -77,6 +76,23 @@ public class BagGUI extends AbstractFrameGUI {
 
     @Override
     public boolean dragInventory(Player player, InventoryView view, ItemStack oldCursorItemStack, ItemStack cursorItemstack, DragType type, Set<Integer> slot, Set<Integer> rawSlot, Map<Integer, ItemStack> newItems) {
+        ItemStack held = player.getInventory().getItemInMainHand();
+        if (held.getItemMeta() instanceof BlockStateMeta meta && meta.getBlockState() instanceof ShulkerBox box)
+            Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
+                box.getInventory().setContents(view.getTopInventory().getContents());
+                meta.setBlockState(box);
+                Items items = Items.valueOf(held);
+                if (items != null) {
+                    int model = 0;
+                    for (ItemStack test : view.getTopInventory().getContents())
+                        if (test != null)
+                            model++;
+                    meta.setCustomModelData(items.getModel() + model);
+                }
+                held.setItemMeta(meta);
+                player.getInventory().setItem(player.getInventory().getHeldItemSlot(), held);
+            }, 1);
+
         return false;
     }
 

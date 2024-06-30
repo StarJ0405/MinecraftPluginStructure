@@ -4,21 +4,42 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import shining.starj.structure.Events.Builder.ReplantAgeableEventBuilder;
 
 @Setter
 @Getter
 public class ReplantAgeableEvent extends ReplantEvent {
     private int age;
 
-    public ReplantAgeableEvent(Block block, Material type) {
-        super(block, type);
-        this.age = 0;
+    public ReplantAgeableEvent(Block block, Material result, int age) {
+        super(block, result);
+        this.age = age;
     }
 
-    public static final ReplantAgeableEventBuilder ReplantAgeableEventBuilder = new ReplantAgeableEventBuilder();
+    public static class ReplantAgeableEventBuilder extends ReplantEvent.ReplantEventBuilder {
+        private Block block;
+        private Material result;
+        private int age;
 
-    public static ReplantAgeableEventBuilder builder() {
-        return ReplantAgeableEventBuilder;
+        @Override
+        public ReplantAgeableEventBuilder block(Block block) {
+            this.block = block;
+            return this;
+        }
+
+        @Override
+        public ReplantAgeableEventBuilder result(Material result) {
+            this.result = result;
+            return this;
+        }
+
+        public ReplantAgeableEventBuilder age(int age) {
+            this.age = age;
+            return this;
+        }
+
+        @Override
+        public ReplantAgeableEvent build() {
+            return new ReplantAgeableEvent(block, result, age);
+        }
     }
 }
