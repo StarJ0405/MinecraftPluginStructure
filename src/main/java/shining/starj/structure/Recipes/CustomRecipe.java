@@ -13,15 +13,15 @@ public abstract class CustomRecipe {
     }
 
     public static void initial() {
-        BlastingCustomRecipe.initial();
-        CampfireCustomRecipe.initial();
-        FurnaceCustomRecipe.initial();
-        MerchantCustomRecipe.initial();
-        ShapedCustomRecipe.initial();
-        ShapelessCustomRecipe.initial();
-        SmithingTransformCustomRecipe.initial();
-        SmithingTrimCustomRecipe.initial();
-        SmokingCustomRecipe.initial();
-        StoneCuttingCustomRecipe.initial();
+        CustomBlastingRecipe.initial();
+        CustomCampfireRecipe.initial();
+        CustomFurnaceRecipe.initial();
+        CustomMerchantRecipe.initial();
+        CustomShapedRecipe.initial();
+        CustomShapelessRecipe.initial();
+        CustomSmithingTransformRecipe.initial();
+        CustomSmithingTrimRecipe.initial();
+        CustomSmokingRecipe.initial();
+        CustomStoneCuttingRecipe.initial();
     }
 }

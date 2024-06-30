@@ -1,12 +1,13 @@
 package shining.starj.structure.Recipes;
 
+import lombok.Builder;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 
 import java.util.Arrays;
 
-public class MerchantCustomRecipe extends CustomRecipe {
+public class CustomMerchantRecipe extends CustomRecipe {
     protected final MerchantRecipe recipe;
 
     // use 사용된 횟수
@@ -16,7 +17,8 @@ public class MerchantCustomRecipe extends CustomRecipe {
     // demand 수요
     // specialPrice 특별 가격
     // items 재료
-    public MerchantCustomRecipe(String key, ItemStack result, int uses, int maxUses, boolean experienceReward, int villagerExperience, float priceMultiplier, int demand, int specialPrice, ItemStack[] items) {
+    @Builder
+    public CustomMerchantRecipe(String key, ItemStack result, int uses, int maxUses, boolean experienceReward, int villagerExperience, float priceMultiplier, int demand, int specialPrice, ItemStack[] items) {
         super(key);
         this.recipe = new MerchantRecipe(result, uses, maxUses, experienceReward, villagerExperience, priceMultiplier, demand, specialPrice);
         this.recipe.setIngredients(Arrays.stream(items).toList());

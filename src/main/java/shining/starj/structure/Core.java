@@ -20,8 +20,8 @@ public class Core extends JavaPlugin {
         core = this;
         //
         AbstractEvent.initial(); // 이벤트
-        Items.initial(); // 아이템
         AbstractCommand.initial(); // 명령어
+        Items.initial(); // 아이템
         CustomRecipe.initial(); // 레시피
         AbstractGUI.initial(); // GUI
         AbstractEventListener.initial(); // 이벤트 리스너

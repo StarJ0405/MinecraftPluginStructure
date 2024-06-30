@@ -1,5 +1,6 @@
 package shining.starj.structure.Recipes;
 
+import lombok.Builder;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.BlastingRecipe;
@@ -8,14 +9,15 @@ import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.recipe.CookingBookCategory;
 import shining.starj.structure.Core;
 
-public class BlastingCustomRecipe extends CustomRecipe {
+public class CustomBlastingRecipe extends CustomRecipe {
     protected final BlastingRecipe recipe;
 
-    public BlastingCustomRecipe(String key, ItemStack result, CookingBookCategory category, RecipeChoice choice, float exp, int cookingTime) {
+    @Builder
+    public CustomBlastingRecipe(String key, ItemStack result, CookingBookCategory category, RecipeChoice choice, float exp, int cookingTime) {
         super(key);
         this.recipe = new BlastingRecipe(new NamespacedKey(Core.getCore(), this.key), result, choice, exp, cookingTime);
         recipe.setInputChoice(choice);
-        recipe.setCategory(category);
+        if (category != null) recipe.setCategory(category);
         Bukkit.addRecipe(recipe);
     }
 

@@ -6,12 +6,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import shining.starj.structure.Events.Prework.TimerEvent;
@@ -26,7 +24,7 @@ public class TimerListener extends AbstractEventListener {
     private void refillItems(Block block) {
         Furnace furnace = (Furnace) block.getState();
         furnace.getInventory().setFuel(new ItemStack(Material.LAVA_BUCKET));
-        furnace.getInventory().setResult(new ItemStack(Material.AIR));
+        furnace.getInventory().setResult(Items.timer.getItemStack());
         ItemStack time = getTimer();
         time.setAmount(60);
         furnace.getInventory().setSmelting(time);
@@ -71,7 +69,7 @@ public class TimerListener extends AbstractEventListener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void Event(FurnaceSmeltEvent e) {
         Block block = e.getBlock();
-        if (isItem(e.getResult())) if (isCorrectLocation(block)) {
+        if (isItem(e.getSource())) if (isCorrectLocation(block)) {
             refillItems(block);
             Bukkit.getPluginManager().callEvent(TimerEvent.builder().block(block).build());
         } else removeFurnace(block);
@@ -96,12 +94,5 @@ public class TimerListener extends AbstractEventListener {
     public void Event(FurnaceBurnEvent e) {
         Block block = e.getBlock();
         if (isCorrectLocation(block)) refillItems(block);
-    }
-
-    @EventHandler
-    public void Events(PlayerToggleSneakEvent e) {
-        Player player = e.getPlayer();
-        player.setFoodLevel(1);
-        player.setSaturation(0f);
     }
 }
