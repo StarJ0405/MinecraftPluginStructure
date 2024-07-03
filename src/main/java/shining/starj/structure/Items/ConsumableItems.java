@@ -4,9 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.FoodComponent;
+import org.bukkit.potion.PotionEffectType;
 
 public class ConsumableItems extends Items {
     //
+    public static ConsumableItems test0 = ConsumableItems.builder().key("test0").material(Material.IRON_NUGGET).eatDelay(0.1f).nutrition(2).saturation(6f).foodEffectInfos(FoodEffectInfo.builder().potionEffectType(PotionEffectType.HASTE).tick(200).probability(0.75f).amplifier(1).build()).build();
+    public static ConsumableItems test1 = ConsumableItems.builder().key("test1").material(Material.IRON_INGOT).eatDelay(1f).nutrition(4).saturation(4f).foodEffectInfos(FoodEffectInfo.builder().potionEffectType(PotionEffectType.HASTE).tick(200).probability(0.5f).amplifier(2).build()).build();
+    public static ConsumableItems test2 = ConsumableItems.builder().key("test2").material(Material.IRON_BLOCK).eatDelay(2f).nutrition(6).saturation(2f).foodEffectInfos(FoodEffectInfo.builder().potionEffectType(PotionEffectType.HASTE).tick(200).probability(0.25f).amplifier(3).build()).build();
     //
     protected final boolean canAlwaysEat;
     protected Float eatDelay;

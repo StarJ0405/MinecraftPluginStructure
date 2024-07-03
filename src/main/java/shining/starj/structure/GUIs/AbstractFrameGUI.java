@@ -3,23 +3,27 @@ package shining.starj.structure.GUIs;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import shining.starj.structure.Systems.InventorySize;
 
 public abstract class AbstractFrameGUI extends AbstractGUI {
     public AbstractFrameGUI(String key) {
         super(key, "", null);
     }
 
-    @Deprecated
     @Override
-    public Inventory openInv(Player player) {
-        return null;
+    public AbstractFrameGUI setInfo(Player player, GUIInfo info) {
+        return (AbstractFrameGUI) super.setInfo(player, info);
     }
 
-    public Inventory openInv(Player player, String title, InventorySize inventorySize) {
-        openGUI.put(player.getUniqueId(), this.key);
-        Inventory inv = Bukkit.createInventory(player, inventorySize.getSize(), title);
-        player.openInventory(inv);
-        return inv;
+    @Override
+    public Inventory openInv(Player player) {
+        GUIInfo guiInfo = getInfo(player);
+        if (guiInfo instanceof VariableInfo info && info.getTitle() != null && info.getInventorySize() != null) {
+            openGUI.put(player.getUniqueId(), this.key);
+            Inventory inv = Bukkit.createInventory(player, info.getInventorySize().getSize(), info.getTitle());
+            player.openInventory(inv);
+            return inv;
+        } else
+            throw new RuntimeException("FrameGUI 는 VariableInfo 를 사용해야합니다.");
     }
+
 }

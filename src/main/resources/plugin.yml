@@ -20,7 +20,8 @@ commands:
     usage: "/permission [player] add [permission] (ticks)\n/permission [player] remove [permission]"
     aliases: [p]
     operator: admin
-
+libraries:
+  - 'com.h2database:h2:2.2.220'
 preset:
   commands:
     test:

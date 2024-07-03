@@ -4,7 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.*;
 import shining.starj.structure.Listeners.AbstractEventListener;
 
-public class LoginListener extends AbstractEventListener {
+public class PlayerLoginListener extends AbstractEventListener {
     // 비동기적 로그인 시도시 발생
     @EventHandler
     public void Events(AsyncPlayerPreLoginEvent e) {

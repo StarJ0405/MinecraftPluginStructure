@@ -26,7 +26,7 @@ public class BagItem extends Items implements Interactable {
     protected final boolean defaultValue;
 
     public BagItem(String key, String displayName, BagColor bagColor, Integer model, String[] lores, InventorySize inventorySize, RecipeChoice[] allows, RecipeChoice[] bans, boolean defaultValue) {
-        super(key, displayName, bagColor.getMaterial(), lores, model, false, false, true, true, false, 1);
+        super(key, displayName, bagColor.getMaterial(), lores, model, false, false, true, false, false, 1);
         this.inventorySize = inventorySize;
         this.bagColor = bagColor;
         this.allows = allows;
@@ -233,7 +233,7 @@ public class BagItem extends Items implements Interactable {
 
     @Override
     public boolean right(Player player, ItemStack item, Block block) {
-        Inventory inv = AbstractGUI.bagGUI.openInv(player, this.displayName, inventorySize);
+        Inventory inv = AbstractGUI.bagGUI.setInfo(player, AbstractGUI.VariableInfo.builder().title(this.displayName).inventorySize(this.inventorySize).build()).openInv(player);
         if (item.getItemMeta() instanceof BlockStateMeta meta && meta.getBlockState() instanceof ShulkerBox box) {
             ItemStack[] contents = inv.getContents();
             ItemStack[] pre = box.getInventory().getContents();

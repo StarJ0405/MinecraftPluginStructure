@@ -8,8 +8,9 @@ import shining.starj.structure.Commands.AbstractCommand;
 import shining.starj.structure.Events.AbstractEvent;
 import shining.starj.structure.GUIs.AbstractGUI;
 import shining.starj.structure.Items.Items;
-import shining.starj.structure.Recipes.CustomRecipe;
 import shining.starj.structure.Listeners.AbstractEventListener;
+import shining.starj.structure.Recipes.CustomRecipe;
+import shining.starj.structure.Systems.DBStore;
 
 public class Core extends JavaPlugin {
     @Getter
@@ -25,12 +26,15 @@ public class Core extends JavaPlugin {
         CustomRecipe.initial(); // 레시피
         AbstractGUI.initial(); // GUI
         AbstractEventListener.initial(); // 이벤트 리스너
+        DBStore.connect(); // DB
         //
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 정상적으로 불러와졌습니다.");
     }
 
 
     public void onDisable() {
+        //
+        DBStore.disconnect();
         //
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + this.getName() + "이 종료되었습니다.");
     }

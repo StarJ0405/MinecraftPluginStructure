@@ -1,5 +1,6 @@
 package shining.starj.structure.GUIs.Prework;
 
+import lombok.Builder;
 import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class BagGUI extends AbstractFrameGUI {
+    @Builder
     public BagGUI(String key) {
         super(key);
     }
