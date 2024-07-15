@@ -23,6 +23,7 @@ public abstract class AbstractEventListener implements Listener {
         // 사전 작업용
         BasicProtectListener.builder().build();
         BlockPickupListener.builder().build();
+        BossBarListener.builder().build();
         GUIListener.builder().build();
         HarvestListener.builder().build();
         InventorySortListener.builder().build();

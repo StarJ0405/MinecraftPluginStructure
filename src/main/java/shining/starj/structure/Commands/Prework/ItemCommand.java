@@ -45,11 +45,23 @@ public class ItemCommand extends AbstractCommand {
 
                         }
                     ItemStack item = i.getItemStack(player);
-                    item.setAmount(amount);
-                    player.getInventory().addItem(item);
+                    int max = item.getMaxStackSize();
+                    while (amount > 0) {
+                        if (amount > max) {
+                            item.setAmount(max);
+                            amount -= max;
+                        } else {
+                            item.setAmount(amount);
+                            amount = 0;
+                        }
+                        if (player.getInventory().firstEmpty() == -1)
+                            player.getWorld().dropItem(player.getLocation(), item);
+                        else
+                            player.getInventory().addItem(item);
+                    }
                     return true;
                 } else
-                    MessageStore.sendMessage(sender, ChatColor.RED + "없는 아이템입니다.");
+                    MessageStore.getMessageStore().sendErrorMessage(sender, ChatColor.RED + "없는 아이템입니다.", false);
             } else try {
                 return Bukkit.getEntity(UUID.fromString(args[0])) != null;
             } catch (Exception ignored) {

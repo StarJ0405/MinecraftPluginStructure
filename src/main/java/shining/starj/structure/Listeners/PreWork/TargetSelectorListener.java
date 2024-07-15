@@ -154,10 +154,10 @@ public class TargetSelectorListener extends AbstractEventListener {
             }
         } catch (NotFoundPlayerException | InvalidCommandArgsException | IncompleteCommandException exception) {
             e.setCancelled(true);
-            MessageStore.sendMessage(sender, exception.getMessage());
+            MessageStore.getMessageStore().sendErrorMessage(sender, exception.getMessage(), false);
         } catch (ArrayIndexOutOfBoundsException exception) {
             e.setCancelled(true);
-            MessageStore.sendMessage(sender, ChatColor.RED + "알 수 없거나 불완전한 명령어입니다. 아래의 오류를 확인하세요.\n" + ChatColor.GRAY + e.getCommand() + ChatColor.RED + "<--[여기]");
+            MessageStore.getMessageStore().sendErrorMessage(sender, ChatColor.RED + "알 수 없거나 불완전한 명령어입니다. 아래의 오류를 확인하세요.\n" + ChatColor.GRAY + e.getCommand() + ChatColor.RED + "<--[여기]", false);
         }
     }
 
@@ -284,10 +284,10 @@ public class TargetSelectorListener extends AbstractEventListener {
             }
         } catch (NotFoundPlayerException | InvalidCommandArgsException | IncompleteCommandException exception) {
             e.setCancelled(true);
-            MessageStore.sendMessage(sender, exception.getMessage());
+            MessageStore.getMessageStore().sendErrorMessage(sender, exception.getMessage(), false);
         } catch (IndexOutOfBoundsException exception) {
             e.setCancelled(true);
-            MessageStore.sendMessage(sender, ChatColor.RED + "알 수 없거나 불완전한 명령어입니다. 아래의 오류를 확인하세요.\n" + ChatColor.GRAY + e.getMessage() + ChatColor.RED + "<--[여기]");
+            MessageStore.getMessageStore().sendErrorMessage(sender, ChatColor.RED + "알 수 없거나 불완전한 명령어입니다. 아래의 오류를 확인하세요.\n" + ChatColor.GRAY + e.getMessage() + ChatColor.RED + "<--[여기]", false);
         }
     }
 

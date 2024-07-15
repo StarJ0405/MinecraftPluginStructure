@@ -1,7 +1,5 @@
 package shining.starj.structure.Commands;
 
-import lombok.Builder;
-import net.minecraft.server.commands.ItemCommands;
 import org.bukkit.command.*;
 import org.jetbrains.annotations.NotNull;
 import shining.starj.structure.Commands.Prework.ItemCommand;
@@ -62,7 +60,7 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
             }
             throw new IncompleteCommandException(builder.toString());
         } catch (IncompleteCommandException | NoAuthorityException exception) {
-            MessageStore.sendMessage(sender, exception.getMessage());
+            MessageStore.getMessageStore().sendErrorMessage(sender, exception.getMessage(),false);
         }
         return true;
     }

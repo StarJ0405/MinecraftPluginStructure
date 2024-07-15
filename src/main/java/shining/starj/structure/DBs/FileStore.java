@@ -1,4 +1,4 @@
-package shining.starj.structure.Systems;
+package shining.starj.structure.DBs;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;

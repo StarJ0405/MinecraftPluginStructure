@@ -10,15 +10,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import shining.starj.structure.Events.Prework.TimerEvent;
 import shining.starj.structure.Items.Items;
 import shining.starj.structure.Listeners.AbstractEventListener;
-import shining.starj.structure.Systems.DBStore;
-
-import java.sql.SQLException;
 
 @Builder
 public class TimerListener extends AbstractEventListener {
@@ -98,22 +94,5 @@ public class TimerListener extends AbstractEventListener {
     public void Event(FurnaceBurnEvent e) {
         Block block = e.getBlock();
         if (isCorrectLocation(block)) refillItems(block);
-    }
-
-    @EventHandler
-    public void Event(PlayerToggleSneakEvent e) {
-        try {
-            DBStore.setData(e.getPlayer().getName());
-        } catch (SQLException ex) {
-            Bukkit.broadcastMessage("exception");
-        }
-    }
-    @EventHandler
-    public void Events(TimerEvent e){
-        try {
-            DBStore.getDate(0);
-        } catch (SQLException ex) {
-            Bukkit.broadcastMessage("exception");
-        }
     }
 }
