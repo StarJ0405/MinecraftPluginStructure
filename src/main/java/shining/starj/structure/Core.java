@@ -37,7 +37,7 @@ public class Core extends JavaPlugin {
 
     public void onDisable() {
         // 초기화
-        for (MessageStore.BoosBarInfo info : MessageStore.getBars())
+        for (MessageStore.BoosBarInfo info : MessageStore.getBossBars())
             info.bar().removeAll();
         // DB연결 종료
         AbstractTableInstance.disconnect();

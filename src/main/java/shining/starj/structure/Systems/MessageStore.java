@@ -2,6 +2,7 @@ package shining.starj.structure.Systems;
 
 import lombok.Builder;
 import lombok.Getter;
+import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Item;
 import org.bukkit.*;
@@ -28,9 +29,11 @@ import java.util.function.Predicate;
 
 public class MessageStore {
     @Getter
-    private final static List<BoosBarInfo> bars = new ArrayList<>();
+    private final static List<BoosBarInfo> bossBars = new ArrayList<>();
     @Getter
     private final static MessageStore messageStore = new MessageStore();
+    @Getter
+    private final static List<ActionBarInfo> actionBars = new ArrayList<>();
 
     private MessageStore() {
 
@@ -426,7 +429,7 @@ public class MessageStore {
                         list.add(player.getUniqueId());
                         bar.addPlayer(player);
                     }
-            bars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).build());
+            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).build());
         }, (int) Math.floor(delaySeconds * Bukkit.getServerTickManager().getTickRate()));
         else {
             List<UUID> list = new ArrayList<>();
@@ -439,7 +442,7 @@ public class MessageStore {
                         list.add(player.getUniqueId());
                         bar.addPlayer(player);
                     }
-            bars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).build());
+            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).build());
         }
         return this;
     }
@@ -462,14 +465,14 @@ public class MessageStore {
             bar.addPlayer(player);
             bar.setProgress(1d);
             bar.setVisible(true);
-            bars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(Arrays.stream(new UUID[]{player.getUniqueId()}).toList()).build());
+            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(Arrays.stream(new UUID[]{player.getUniqueId()}).toList()).build());
         }, (int) Math.floor(delaySeconds * Bukkit.getServerTickManager().getTickRate()));
         else {
             BossBar bar = Bukkit.createBossBar(title, barColor, barStyle, flags);
             bar.addPlayer(player);
             bar.setProgress(1d);
             bar.setVisible(true);
-            bars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(Arrays.stream(new UUID[]{player.getUniqueId()}).toList()).build());
+            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(Arrays.stream(new UUID[]{player.getUniqueId()}).toList()).build());
         }
         return this;
     }
@@ -512,7 +515,38 @@ public class MessageStore {
         return sendTextDisplay(loc, msg, 0, durationSeconds, textOpacity, alignment, width, height, bgColor, defaultBackground, seeThrough, shadowed);
     }
 
+    public MessageStore sendActionbar(Player player, double durationSeconds, String msg, double delaySeconds) {
+        if (delaySeconds > 0) Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(msg).create());
+            if (durationSeconds > 0)
+                actionBars.add(ActionBarInfo.builder().msg(msg).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(Arrays.stream(new UUID[]{player.getUniqueId()}).toList()).build());
+        }, (int) Math.floor(delaySeconds * Bukkit.getServerTickManager().getTickRate()));
+        else {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(msg).create());
+            if (durationSeconds > 0)
+                actionBars.add(ActionBarInfo.builder().msg(msg).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(Arrays.stream(new UUID[]{player.getUniqueId()}).toList()).build());
+        }
+        return this;
+    }
+
+    public MessageStore sendActionbar(Player player, double durationSeconds, String msg) {
+        return sendActionbar(player, durationSeconds, msg, 0);
+    }
+
+    public MessageStore sendActionbar(Player player, String msg, double delaySeconds) {
+        return sendActionbar(player, 0, msg, delaySeconds);
+    }
+
+    public MessageStore sendActionbar(Player player, String msg) {
+        return sendActionbar(player, 0, msg, 0);
+    }
+
     @Builder
     public record BoosBarInfo(BossBar bar, Long startTime, Long endTime, List<UUID> players, boolean every) {
+    }
+
+    @Builder
+    public record ActionBarInfo(String msg, Long endTime, List<UUID> players, boolean every) {
+
     }
 }
