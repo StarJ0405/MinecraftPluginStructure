@@ -42,16 +42,20 @@ public class MessageListener extends AbstractEventListener {
                             entity.remove();
         for (MessageStore.ActionBarInfo info : MessageStore.getActionBars())
             if (System.currentTimeMillis() >= info.endTime()) // 종료
-                if (info.every()) for (Player p : Bukkit.getOnlinePlayers())
-                    MessageStore.getMessageStore().sendActionbar(p, "");
-                else for (UUID uuid : info.players()) {
+                if (info.every()) {
+                    for (Player p : Bukkit.getOnlinePlayers())
+                        if (info.predicate() == null || info.predicate().test(p))
+                            MessageStore.getMessageStore().sendActionbar(p, "");
+                } else for (UUID uuid : info.players()) {
                     OfflinePlayer off = Bukkit.getOfflinePlayer(uuid);
                     if (off.isOnline()) MessageStore.getMessageStore().sendActionbar(off.getPlayer(), "");
                 }
             else { // 진행중
-                if (info.every()) for (Player p : Bukkit.getOnlinePlayers())
-                    MessageStore.getMessageStore().sendActionbar(p, info.msg());
-                else for (UUID uuid : info.players()) {
+                if (info.every()) {
+                    for (Player p : Bukkit.getOnlinePlayers())
+                        if (info.predicate() == null || info.predicate().test(p))
+                            MessageStore.getMessageStore().sendActionbar(p, info.msg());
+                } else for (UUID uuid : info.players()) {
                     OfflinePlayer off = Bukkit.getOfflinePlayer(uuid);
                     if (off.isOnline()) MessageStore.getMessageStore().sendActionbar(off.getPlayer(), info.msg());
                 }
@@ -62,8 +66,9 @@ public class MessageListener extends AbstractEventListener {
     public void Events(PlayerJoinEvent e) {
         Player player = e.getPlayer();
         for (MessageStore.BoosBarInfo info : MessageStore.getBossBars())
-            if (info.every()) info.bar().addPlayer(player);
-            else {
+            if (info.every()) {
+                if (info.predicate() == null || info.predicate().test(player)) info.bar().addPlayer(player);
+            } else {
                 BossBar bar = info.bar();
                 if (info.players().contains(player.getUniqueId())) bar.addPlayer(player);
             }
@@ -71,8 +76,6 @@ public class MessageListener extends AbstractEventListener {
 
     @EventHandler
     public void Test(PlayerToggleSneakEvent e) {
-        Player player = e.getPlayer();
-        if (e.isSneaking()) MessageStore.getMessageStore().sendActionbar(player, 5, "test", 1);
 
     }
 }

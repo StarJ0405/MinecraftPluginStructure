@@ -429,7 +429,7 @@ public class MessageStore {
                         list.add(player.getUniqueId());
                         bar.addPlayer(player);
                     }
-            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).build());
+            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).predicate(predicate).build());
         }, (int) Math.floor(delaySeconds * Bukkit.getServerTickManager().getTickRate()));
         else {
             List<UUID> list = new ArrayList<>();
@@ -442,7 +442,7 @@ public class MessageStore {
                         list.add(player.getUniqueId());
                         bar.addPlayer(player);
                     }
-            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).build());
+            bossBars.add(BoosBarInfo.builder().bar(bar).startTime(System.currentTimeMillis()).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).predicate(predicate).build());
         }
         return this;
     }
@@ -515,6 +515,58 @@ public class MessageStore {
         return sendTextDisplay(loc, msg, 0, durationSeconds, textOpacity, alignment, width, height, bgColor, defaultBackground, seeThrough, shadowed);
     }
 
+    public MessageStore sendBroadcastActionbar(double durationSeconds, String msg, double delaySeconds, Predicate<Player> predicate) {
+        if (delaySeconds > 0) Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
+            List<UUID> list = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers())
+                if (predicate == null || predicate.test(player)) {
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(msg).create());
+                    list.add(player.getUniqueId());
+                }
+            if (durationSeconds > 0)
+                actionBars.add(ActionBarInfo.builder().msg(msg).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).predicate(predicate).build());
+        }, (int) Math.floor(delaySeconds * Bukkit.getServerTickManager().getTickRate()));
+        else {
+            List<UUID> list = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers())
+                if (predicate == null || predicate.test(player)) {
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(msg).create());
+                    list.add(player.getUniqueId());
+                }
+            if (durationSeconds > 0)
+                actionBars.add(ActionBarInfo.builder().msg(msg).endTime(System.currentTimeMillis() + ((long) durationSeconds * 1000L)).players(list).predicate(predicate).build());
+        }
+        return this;
+    }
+
+    public MessageStore sendBroadcastActionbar(double durationSeconds, String msg, double delaySeconds) {
+        return sendBroadcastActionbar(durationSeconds, msg, delaySeconds, null);
+    }
+
+    public MessageStore sendBroadcastActionbar(double durationSeconds, String msg, Predicate<Player> predicate) {
+        return sendBroadcastActionbar(durationSeconds, msg, 0, predicate);
+    }
+
+    public MessageStore sendBroadcastActionbar(double durationSeconds, String msg) {
+        return sendBroadcastActionbar(durationSeconds, msg, 0, null);
+    }
+
+    public MessageStore sendBroadcastActionbar(String msg, double delaySeconds, Predicate<Player> predicate) {
+        return sendBroadcastActionbar(0, msg, delaySeconds, predicate);
+    }
+
+    public MessageStore sendBroadcastActionbar(String msg, double delaySeconds) {
+        return sendBroadcastActionbar(0, msg, delaySeconds, null);
+    }
+
+    public MessageStore sendBroadcastActionbar(String msg, Predicate<Player> predicate) {
+        return sendBroadcastActionbar(0, msg, 0, predicate);
+    }
+
+    public MessageStore sendBroadcastActionbar(String msg) {
+        return sendBroadcastActionbar(0, msg, 0, null);
+    }
+
     public MessageStore sendActionbar(Player player, double durationSeconds, String msg, double delaySeconds) {
         if (delaySeconds > 0) Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(msg).create());
@@ -542,11 +594,13 @@ public class MessageStore {
     }
 
     @Builder
-    public record BoosBarInfo(BossBar bar, Long startTime, Long endTime, List<UUID> players, boolean every) {
+    public record BoosBarInfo(BossBar bar, Long startTime, Long endTime, List<UUID> players, boolean every,
+                              Predicate<Player> predicate) {
     }
 
     @Builder
-    public record ActionBarInfo(String msg, Long endTime, List<UUID> players, boolean every) {
+    public record ActionBarInfo(String msg, Long endTime, List<UUID> players, boolean every,
+                                Predicate<Player> predicate) {
 
     }
 }
