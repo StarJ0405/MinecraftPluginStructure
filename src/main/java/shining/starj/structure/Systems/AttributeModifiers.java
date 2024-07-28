@@ -36,9 +36,8 @@ public class AttributeModifiers extends Attributes {
 
     @Override
     public void apply(LivingEntity livingEntity) {
-        if (amount == 0)
-            livingEntity.getAttribute(this.attribute).removeModifier(getAttributeModifier());
-        else
+        livingEntity.getAttribute(this.attribute).removeModifier(getAttributeModifier());
+        if (amount != 0)
             livingEntity.getAttribute(this.attribute).addModifier(getAttributeModifier());
     }
 

@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -87,6 +88,95 @@ public class BlockPickupListener extends AbstractEventListener {
             }
         }
     }
+
+    @EventHandler
+    public void Events(PlayerDeathEvent e) {
+        Player player = e.getEntity();
+
+        AttributeModifiers.builder().uuid(player.getUniqueId()).name(player.getName()).amount(0).operation(AttributeModifier.Operation.ADD_SCALAR).attribute(Attribute.GENERIC_MOVEMENT_SPEED).build().apply(player);
+        ItemStack held = player.getInventory().getItemInMainHand();
+        if (held.hasItemMeta()) {
+            ItemMeta meta = held.getItemMeta();
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            if (container.has(new NamespacedKey(Core.getCore(), "size"))) {
+                e.getDrops().remove(held);
+                player.getInventory().removeItem(held);
+                final int size = container.get(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER);
+                Block placed = player.getLocation().getBlock();
+                if (!placed.getType().isAir()) do {
+                    placed = placed.getLocation().add(0, 1, 0).getBlock();
+                } while (!placed.getType().isAir());
+                placed.setType(held.getType(), true);
+                switch (held.getType()) {
+                    case CHEST, BARREL, SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
+                        List<ItemStack> stored = new ArrayList<>();
+                        for (int i = 0; i < size; i++)
+                            if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) try {
+                                ByteArrayInputStream inputStream = new ByteArrayInputStream(container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.BYTE_ARRAY));
+                                BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+                                stored.add((ItemStack) dataInput.readObject());
+                                dataInput.close();
+                            } catch (ClassNotFoundException | IOException ignored) {
+
+                            }
+                            else stored.add(new ItemStack(Material.AIR));
+
+                        if (held.getType().equals(Material.CHEST)) {
+                            Chest chest = (Chest) placed.getState();
+                            chest.getInventory().setContents(stored.toArray(ItemStack[]::new));
+                        } else if (held.getType().equals(Material.BARREL)) {
+                            Barrel barrel = (Barrel) placed.getState();
+                            barrel.getInventory().setContents(stored.toArray(ItemStack[]::new));
+                        } else {
+                            ShulkerBox shulkerBox = (ShulkerBox) placed.getState();
+                            shulkerBox.getInventory().setContents(stored.toArray(ItemStack[]::new));
+                        }
+
+                    }
+
+                    case FURNACE, BLAST_FURNACE, SMOKER -> {
+                        List<ItemStack> stored = new ArrayList<>();
+                        for (int i = 0; i < size; i++)
+                            if (container.has(new NamespacedKey(Core.getCore(), "inventory." + i))) try {
+                                ByteArrayInputStream inputStream = new ByteArrayInputStream(container.get(new NamespacedKey(Core.getCore(), "inventory." + i), PersistentDataType.BYTE_ARRAY));
+                                BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+                                stored.add((ItemStack) dataInput.readObject());
+                                dataInput.close();
+                            } catch (ClassNotFoundException | IOException ignored) {
+
+                            }
+                            else stored.add(new ItemStack(Material.AIR));
+                        short burnTime = container.has(new NamespacedKey(Core.getCore(), "burnTime")) ? burnTime = container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT) : 0;
+                        short cookTime = container.has(new NamespacedKey(Core.getCore(), "cookTime")) ? container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT) : 0;
+                        int cookTimeTotal = container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")) ? container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER) : 0;
+                        if (held.getType().equals(Material.FURNACE)) {
+                            Furnace furnace = (Furnace) placed.getState();
+                            furnace.getSnapshotInventory().setContents(stored.toArray(ItemStack[]::new));
+                            furnace.setBurnTime(burnTime);
+                            furnace.setCookTime(cookTime);
+                            furnace.setCookTimeTotal(cookTimeTotal);
+                            furnace.update(true, true);
+                        } else if (held.getType().equals(Material.BLAST_FURNACE)) {
+                            BlastFurnace blastFurnace = (BlastFurnace) placed.getState();
+                            blastFurnace.getSnapshotInventory().setContents(stored.toArray(ItemStack[]::new));
+                            blastFurnace.setBurnTime(burnTime);
+                            blastFurnace.setCookTime(cookTime);
+                            blastFurnace.setCookTimeTotal(cookTimeTotal);
+                            blastFurnace.update(true, true);
+                        } else {
+                            Smoker smoker = (Smoker) placed.getState();
+                            smoker.getSnapshotInventory().setContents(stored.toArray(ItemStack[]::new));
+                            smoker.setBurnTime(burnTime);
+                            smoker.setCookTime(cookTime);
+                            smoker.setCookTimeTotal(cookTimeTotal);
+                            smoker.update(true, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     @Nullable
     private static ContainerPickupEvent getMoveContainerEvent(Block block, Player player) {
