@@ -1,4 +1,4 @@
-package shining.starj.structure.Systems;
+package shining.starj.structure.GUIs;
 
 public enum InventorySize {
     One, Two, Three

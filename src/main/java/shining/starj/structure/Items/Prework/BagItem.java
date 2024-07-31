@@ -16,7 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 import shining.starj.structure.GUIs.AbstractGUI;
 import shining.starj.structure.Items.Interactable;
 import shining.starj.structure.Items.Items;
-import shining.starj.structure.Systems.InventorySize;
+import shining.starj.structure.GUIs.InventorySize;
 
 public class BagItem extends Items implements Interactable {
     protected final InventorySize inventorySize;

@@ -3,7 +3,6 @@ package shining.starj.structure.GUIs;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import shining.starj.structure.Systems.InventorySize;
 
 public abstract class AbstractSingletonGUI extends AbstractGUI {
     protected final Inventory inv;

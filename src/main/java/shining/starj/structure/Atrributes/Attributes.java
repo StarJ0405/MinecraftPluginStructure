@@ -1,4 +1,4 @@
-package shining.starj.structure.Systems;
+package shining.starj.structure.Atrributes;
 
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;

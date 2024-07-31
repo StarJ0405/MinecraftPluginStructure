@@ -31,7 +31,7 @@ import shining.starj.structure.Events.Prework.ContainerPlaceEvent;
 import shining.starj.structure.Events.Prework.FuelContainerPickupEvent;
 import shining.starj.structure.Events.Prework.FuelContainerPlaceEvent;
 import shining.starj.structure.Listeners.AbstractEventListener;
-import shining.starj.structure.Systems.AttributeModifiers;
+import shining.starj.structure.Atrributes.AttributeModifiers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

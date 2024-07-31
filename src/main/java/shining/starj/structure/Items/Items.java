@@ -10,7 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import shining.starj.structure.Core;
 import shining.starj.structure.Items.Prework.BagItem;
-import shining.starj.structure.Systems.InventorySize;
+import shining.starj.structure.GUIs.InventorySize;
 
 import java.util.ArrayList;
 import java.util.Arrays;

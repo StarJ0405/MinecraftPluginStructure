@@ -1,4 +1,4 @@
-package shining.starj.structure.Systems;
+package shining.starj.structure.Atrributes;
 
 import lombok.Builder;
 import org.bukkit.attribute.Attribute;

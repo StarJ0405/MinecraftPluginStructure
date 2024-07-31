@@ -14,7 +14,6 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import shining.starj.structure.Core;
 import shining.starj.structure.GUIs.Prework.BagGUI;
-import shining.starj.structure.Systems.InventorySize;
 
 import java.util.*;
 
