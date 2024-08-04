@@ -15,8 +15,8 @@ public class FuelContainerPickupEvent extends ContainerPickupEvent {
     private short cookTime;
     private int cookTimeTotal;
 
-    public FuelContainerPickupEvent(Player player, Block block, List<ItemStack> stored, short burnTime, short cookTime, int cookTimeTotal) {
-        super(player, block, stored);
+    public FuelContainerPickupEvent(Player player, Block block, List<ItemStack> stored, short burnTime, short cookTime, int cookTimeTotal, String lock) {
+        super(player, block, stored, lock);
         this.burnTime = burnTime;
         this.cookTime = cookTime;
         this.cookTimeTotal = cookTimeTotal;
@@ -33,6 +33,7 @@ public class FuelContainerPickupEvent extends ContainerPickupEvent {
         private short burnTime;
         private short cookTime;
         private int cookTimeTotal;
+        private String lock;
 
         @Override
         public FuelContainerPickupEventBuilder player(Player player) {
@@ -67,9 +68,14 @@ public class FuelContainerPickupEvent extends ContainerPickupEvent {
             return this;
         }
 
+        public FuelContainerPickupEventBuilder lock(String lock) {
+            this.lock = lock;
+            return this;
+        }
+
         @Override
         public FuelContainerPickupEvent build() {
-            return new FuelContainerPickupEvent(player, block, stored, burnTime, cookTime, cookTimeTotal);
+            return new FuelContainerPickupEvent(player, block, stored, burnTime, cookTime, cookTimeTotal,lock);
         }
     }
 }

@@ -25,13 +25,13 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.Nullable;
+import shining.starj.structure.Atrributes.AttributeModifiers;
 import shining.starj.structure.Core;
 import shining.starj.structure.Events.Prework.ContainerPickupEvent;
 import shining.starj.structure.Events.Prework.ContainerPlaceEvent;
 import shining.starj.structure.Events.Prework.FuelContainerPickupEvent;
 import shining.starj.structure.Events.Prework.FuelContainerPlaceEvent;
 import shining.starj.structure.Listeners.AbstractEventListener;
-import shining.starj.structure.Atrributes.AttributeModifiers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Builder
-public class BlockPickupListener extends AbstractEventListener {
+public class BlockPickListener extends AbstractEventListener {
     /*
      * 상자 및 블럭 들기
      */
@@ -72,9 +72,10 @@ public class BlockPickupListener extends AbstractEventListener {
 
                     }
                 }
-
                 container.set(new NamespacedKey(Core.getCore(), "inventory"), PersistentDataType.STRING, "");
                 container.set(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER, stored.size());
+                if (block.getState() instanceof Lockable lockable && lockable.isLocked())
+                    container.set(new NamespacedKey(Core.getCore(), "lock"), PersistentDataType.STRING, lockable.getLock());
                 if (event instanceof FuelContainerPickupEvent fuelEvent) {
                     container.set(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT, fuelEvent.getBurnTime());
                     container.set(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT, fuelEvent.getCookTime());
@@ -120,7 +121,6 @@ public class BlockPickupListener extends AbstractEventListener {
 
                             }
                             else stored.add(new ItemStack(Material.AIR));
-
                         if (held.getType().equals(Material.CHEST)) {
                             Chest chest = (Chest) placed.getState();
                             chest.getInventory().setContents(stored.toArray(ItemStack[]::new));
@@ -173,6 +173,10 @@ public class BlockPickupListener extends AbstractEventListener {
                         }
                     }
                 }
+                if (container.has(new NamespacedKey(Core.getCore(), "lock"))) {
+                    Lockable lockable = (Lockable) placed.getState();
+                    lockable.setLock(container.get(new NamespacedKey(Core.getCore(), "lock"), PersistentDataType.STRING));
+                }
             }
         }
     }
@@ -183,24 +187,25 @@ public class BlockPickupListener extends AbstractEventListener {
         ContainerPickupEvent event = null;
         switch (block.getType()) {
             case CHEST ->
-                    event = ContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(((Chest) block.getState()).getInventory().getContents())).build();
+                    event = ContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(((Chest) block.getState()).getInventory().getContents())).lock(((Chest) block.getState()).getLock()).build();
             case BARREL ->
-                    event = ContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(((Barrel) block.getState()).getInventory().getContents())).build();
+                    event = ContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(((Barrel) block.getState()).getInventory().getContents())).lock(((Barrel) block.getState()).getLock()).build();
             case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX ->
-                    event = ContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(((ShulkerBox) block.getState()).getInventory().getContents())).build();
-            case CRAFTING_TABLE, ENDER_CHEST ->
-                    event = ContainerPickupEvent.builder().player(player).block(block).build();
+                    event = ContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(((ShulkerBox) block.getState()).getInventory().getContents())).lock(((ShulkerBox) block.getState()).getLock()).build();
+            case CRAFTING_TABLE, ENDER_CHEST -> {
+                event = ContainerPickupEvent.builder().player(player).block(block).stored(new ArrayList<>()).build();
+            }
             case FURNACE -> {
                 Furnace furnace = (Furnace) block.getState();
-                event = FuelContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(furnace.getInventory().getContents())).burnTime(furnace.getBurnTime()).cookTime(furnace.getCookTime()).cookTimeTotal(furnace.getCookTimeTotal()).build();
+                event = FuelContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(furnace.getInventory().getContents())).burnTime(furnace.getBurnTime()).cookTime(furnace.getCookTime()).cookTimeTotal(furnace.getCookTimeTotal()).lock(furnace.getLock()).build();
             }
             case BLAST_FURNACE -> {
                 BlastFurnace blastFurnace = (BlastFurnace) block.getState();
-                event = FuelContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(blastFurnace.getInventory().getContents())).burnTime(blastFurnace.getBurnTime()).cookTime(blastFurnace.getCookTime()).cookTimeTotal(blastFurnace.getCookTimeTotal()).build();
+                event = FuelContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(blastFurnace.getInventory().getContents())).burnTime(blastFurnace.getBurnTime()).cookTime(blastFurnace.getCookTime()).cookTimeTotal(blastFurnace.getCookTimeTotal()).lock(blastFurnace.getLock()).build();
             }
             case SMOKER -> {
                 Smoker smoker = (Smoker) block.getState();
-                event = FuelContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(smoker.getInventory().getContents())).burnTime(smoker.getBurnTime()).cookTime(smoker.getCookTime()).cookTimeTotal(smoker.getCookTimeTotal()).build();
+                event = FuelContainerPickupEvent.builder().player(player).block(block).stored(Arrays.asList(smoker.getInventory().getContents())).burnTime(smoker.getBurnTime()).cookTime(smoker.getCookTime()).cookTimeTotal(smoker.getCookTimeTotal()).lock(smoker.getLock()).build();
             }
 
         }
@@ -217,6 +222,7 @@ public class BlockPickupListener extends AbstractEventListener {
             final int size = container.get(new NamespacedKey(Core.getCore(), "size"), PersistentDataType.INTEGER);
             ContainerPlaceEvent event = null;
             switch (item.getType()) {
+
                 case CHEST, BARREL, SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
                     List<ItemStack> stored = new ArrayList<>();
                     for (int i = 0; i < size; i++)
@@ -229,10 +235,12 @@ public class BlockPickupListener extends AbstractEventListener {
 
                         }
                         else stored.add(new ItemStack(Material.AIR));
-                    event = ContainerPlaceEvent.builder().player(player).item(item).placedBlock(e.getBlockPlaced()).stored(stored).build();
+                    String lock = container.has(new NamespacedKey(Core.getCore(), "lock")) ? container.get(new NamespacedKey(Core.getCore(), "lock"), PersistentDataType.STRING) : null;
+                    event = ContainerPlaceEvent.builder().player(player).item(item).placedBlock(e.getBlockPlaced()).stored(stored).lock(lock).build();
                 }
                 case ENDER_CHEST, CRAFTING_TABLE ->
                         event = ContainerPlaceEvent.builder().player(player).item(item).placedBlock(e.getBlockPlaced()).stored(new ArrayList<>()).build();
+
                 case FURNACE, BLAST_FURNACE, SMOKER -> {
                     List<ItemStack> stored = new ArrayList<>();
                     for (int i = 0; i < size; i++)
@@ -248,23 +256,31 @@ public class BlockPickupListener extends AbstractEventListener {
                     short burnTime = container.has(new NamespacedKey(Core.getCore(), "burnTime")) ? burnTime = container.get(new NamespacedKey(Core.getCore(), "burnTime"), PersistentDataType.SHORT) : 0;
                     short cookTime = container.has(new NamespacedKey(Core.getCore(), "cookTime")) ? container.get(new NamespacedKey(Core.getCore(), "cookTime"), PersistentDataType.SHORT) : 0;
                     int cookTimeTotal = container.has(new NamespacedKey(Core.getCore(), "cookTimeTotal")) ? container.get(new NamespacedKey(Core.getCore(), "cookTimeTotal"), PersistentDataType.INTEGER) : 0;
-                    event = FuelContainerPlaceEvent.builder().player(player).item(item).placedBlock(e.getBlockPlaced()).stored(stored).burnTime(burnTime).cookTime(cookTime).cookTimeTotal(cookTimeTotal).build();
+                    String lock = container.has(new NamespacedKey(Core.getCore(), "lock")) ? container.get(new NamespacedKey(Core.getCore(), "lock"), PersistentDataType.STRING) : null;
+                    event = FuelContainerPlaceEvent.builder().player(player).item(item).placedBlock(e.getBlockPlaced()).stored(stored).burnTime(burnTime).cookTime(cookTime).cookTimeTotal(cookTimeTotal).lock(lock).build();
                 }
             }
+
             if (!event.isCancelled()) {
                 Block placed = event.getPlacedBlock();
                 switch (placed.getType()) {
                     case CHEST -> {
                         Chest chest = (Chest) placed.getState();
                         chest.getInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                        chest.setLock(event.getLock());
+                        chest.update();
                     }
                     case BARREL -> {
                         Barrel barrel = (Barrel) placed.getState();
                         barrel.getInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                        barrel.setLock(event.getLock());
+                        barrel.update();
                     }
                     case SHULKER_BOX, BLACK_SHULKER_BOX, BLUE_SHULKER_BOX, GREEN_SHULKER_BOX, LIME_SHULKER_BOX, GRAY_SHULKER_BOX, MAGENTA_SHULKER_BOX, PINK_SHULKER_BOX, ORANGE_SHULKER_BOX, RED_SHULKER_BOX, WHITE_SHULKER_BOX, PURPLE_SHULKER_BOX, YELLOW_SHULKER_BOX, BROWN_SHULKER_BOX, CYAN_SHULKER_BOX, LIGHT_BLUE_SHULKER_BOX, LIGHT_GRAY_SHULKER_BOX -> {
                         ShulkerBox shulkerBox = (ShulkerBox) placed.getState();
                         shulkerBox.getInventory().setContents(event.getStored().toArray(ItemStack[]::new));
+                        shulkerBox.setLock(event.getLock());
+                        shulkerBox.update();
                     }
                     case FURNACE -> {
                         Furnace furnace = (Furnace) placed.getState();
@@ -273,6 +289,7 @@ public class BlockPickupListener extends AbstractEventListener {
                             furnace.setBurnTime(fuelEvent.getBurnTime());
                             furnace.setCookTime(fuelEvent.getCookTime());
                             furnace.setCookTimeTotal(fuelEvent.getCookTimeTotal());
+                            furnace.setLock(event.getLock());
                             furnace.update(true, true);
                         }
                     }
@@ -283,6 +300,7 @@ public class BlockPickupListener extends AbstractEventListener {
                             blastFurnace.setBurnTime(fuelEvent.getBurnTime());
                             blastFurnace.setCookTime(fuelEvent.getCookTime());
                             blastFurnace.setCookTimeTotal(fuelEvent.getCookTimeTotal());
+                            blastFurnace.setLock(event.getLock());
                             blastFurnace.update(true, true);
                         }
                     }
@@ -293,6 +311,7 @@ public class BlockPickupListener extends AbstractEventListener {
                             smoker.setBurnTime(fuelEvent.getBurnTime());
                             smoker.setCookTime(fuelEvent.getCookTime());
                             smoker.setCookTimeTotal(fuelEvent.getCookTimeTotal());
+                            smoker.setLock(event.getLock());
                             smoker.update(true, true);
                         }
                     }
@@ -300,6 +319,12 @@ public class BlockPickupListener extends AbstractEventListener {
                     }
                 }
                 AttributeModifiers.builder().uuid(player.getUniqueId()).name(player.getName()).amount(0).operation(AttributeModifier.Operation.ADD_SCALAR).attribute(Attribute.GENERIC_MOVEMENT_SPEED).build().apply(player);
+
+                if (event.getLock() != null && !event.getLock().isBlank() && placed.getState() instanceof Lockable lockable) {
+                    lockable.setLock(event.getLock());
+                    placed.getState().update(true);
+                }
+
             } else e.setCancelled(true);
         }
     }

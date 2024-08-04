@@ -14,11 +14,13 @@ public class ContainerPickupEvent extends AbstractCancelableEvent {
     private final Player player;
     private final Block block;
     private final List<ItemStack> stored;
+    private final String lock;
 
     @Builder
-    public ContainerPickupEvent(Player player, Block block, List<ItemStack> stored) {
+    public ContainerPickupEvent(Player player, Block block, List<ItemStack> stored, String lock) {
         this.player = player;
         this.block = block;
         this.stored = stored;
+        this.lock = lock;
     }
 }

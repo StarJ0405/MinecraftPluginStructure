@@ -15,8 +15,8 @@ public class FuelContainerPlaceEvent extends ContainerPlaceEvent {
     private short cookTime;
     private int cookTimeTotal;
 
-    public FuelContainerPlaceEvent(Player player, ItemStack item, Block placedBlock, List<ItemStack> stored, short burnTime, short cookTime, int cookTimeTotal) {
-        super(player, item, placedBlock, stored);
+    public FuelContainerPlaceEvent(Player player, ItemStack item, Block placedBlock, List<ItemStack> stored, short burnTime, short cookTime, int cookTimeTotal, String lock) {
+        super(player, item, placedBlock, stored, lock);
         this.burnTime = burnTime;
         this.cookTime = cookTime;
         this.cookTimeTotal = cookTimeTotal;
@@ -34,6 +34,7 @@ public class FuelContainerPlaceEvent extends ContainerPlaceEvent {
         private short burnTime;
         private short cookTime;
         private int cookTimeTotal;
+        private String lock;
 
         @Override
         public FuelContainerPlaceEventBuilder player(Player player) {
@@ -68,14 +69,20 @@ public class FuelContainerPlaceEvent extends ContainerPlaceEvent {
             this.cookTime = cookTime;
             return this;
         }
+
         public FuelContainerPlaceEventBuilder cookTimeTotal(int cookTimeTotal) {
             this.cookTimeTotal = cookTimeTotal;
             return this;
         }
 
+        public FuelContainerPlaceEventBuilder lock(String lock) {
+            this.lock = lock;
+            return this;
+        }
+
         @Override
         public FuelContainerPlaceEvent build() {
-            return new FuelContainerPlaceEvent(player, item, placedBlock, stored, burnTime, cookTime, cookTimeTotal);
+            return new FuelContainerPlaceEvent(player, item, placedBlock, stored, burnTime, cookTime, cookTimeTotal, lock);
         }
     }
 

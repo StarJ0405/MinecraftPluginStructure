@@ -18,12 +18,14 @@ public class ContainerPlaceEvent extends AbstractCancelableEvent {
     private ItemStack item;
     private Block placedBlock;
     private List<ItemStack> stored;
+    private final String lock;
 
     @Builder
-    public ContainerPlaceEvent(Player player, ItemStack item, Block placedBlock, List<ItemStack> stored) {
+    public ContainerPlaceEvent(Player player, ItemStack item, Block placedBlock, List<ItemStack> stored, String lock) {
         this.player = player;
         this.item = item;
         this.placedBlock = placedBlock;
         this.stored = stored;
+        this.lock = lock;
     }
 }
