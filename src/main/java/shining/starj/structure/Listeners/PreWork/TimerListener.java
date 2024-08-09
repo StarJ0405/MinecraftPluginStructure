@@ -6,12 +6,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import shining.starj.structure.Events.Prework.TimerEvent;
@@ -97,12 +95,4 @@ public class TimerListener extends AbstractEventListener {
         Block block = e.getBlock();
         if (isCorrectLocation(block)) refillItems(block);
     }
-
-    @EventHandler
-    public void Events(PlayerToggleSneakEvent e) {
-        Player player = e.getPlayer();
-
-
-    }
-
 }

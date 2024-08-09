@@ -1,28 +1,24 @@
-package shining.starj.structure.Systems;
+package shining.starj.structure.Effects;
 
 import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.util.Transformation;
-import org.joml.Matrix4f;
-import shining.starj.structure.Core;
 
 public class EffectStore {
     @Getter
-    public static final EffectStore instance = new EffectStore();
-
-    public enum Simple {
+    private static final EffectStore instance = new EffectStore();
+    @Getter
+    public enum SimpleEffect {
         ANGRY_VILLAGER(Particle.ANGRY_VILLAGER), ASH(Particle.ASH), BUBBLE(Particle.BUBBLE), BUBBLE_COLUMN_UP(Particle.BUBBLE_COLUMN_UP), BUBBLE_POP(Particle.BUBBLE_POP), CAMPFIRE_COSY_SMOKE(Particle.CAMPFIRE_COSY_SMOKE), CAMPFIRE_SIGNAL_SMOKE(Particle.CAMPFIRE_SIGNAL_SMOKE), CHERRY_LEAVES(Particle.CHERRY_LEAVES), CLOUD(Particle.CLOUD), COMPOSTER(Particle.COMPOSTER), CRIMSON_SPORE(Particle.CRIMSON_SPORE), CRIT(Particle.CRIT), CURRENT_DOWN(Particle.CURRENT_DOWN), DAMAGE_INDICATOR(Particle.DAMAGE_INDICATOR), DOLPHIN(Particle.DOLPHIN), DRAGON_BREATH(Particle.DRAGON_BREATH), DRIPPING_DRIPSTONE_LAVA(Particle.DRIPPING_DRIPSTONE_LAVA), DRIPPING_DRIPSTONE_WATER(Particle.DRIPPING_DRIPSTONE_WATER), DRIPPING_HONEY(Particle.DRIPPING_HONEY), DRIPPING_LAVA(Particle.DRIPPING_LAVA), DRIPPING_OBSIDIAN_TEAR(Particle.DRIPPING_OBSIDIAN_TEAR), DRIPPING_WATER(Particle.DRIPPING_WATER), DUST_PLUME(Particle.DUST_PLUME), EFFECT(Particle.EFFECT), EGG_CRACK(Particle.EGG_CRACK), ELDER_GUARDIAN(Particle.ELDER_GUARDIAN), ELECTRIC_SPARK(Particle.ELECTRIC_SPARK), ENCHANT(Particle.ENCHANT), ENCHANTED_HIT(Particle.ENCHANTED_HIT), END_ROD(Particle.END_ROD), EXPLOSION(Particle.EXPLOSION), EXPLOSION_EMITTER(Particle.EXPLOSION_EMITTER), FALLING_DRIPSTONE_LAVA(Particle.FALLING_DRIPSTONE_LAVA), FALLING_DRIPSTONE_WATER(Particle.FALLING_DRIPSTONE_WATER), FALLING_HONEY(Particle.FALLING_HONEY), FALLING_LAVA(Particle.FALLING_LAVA), FALLING_NECTAR(Particle.FALLING_NECTAR), FALLING_OBSIDIAN_TEAR(Particle.FALLING_OBSIDIAN_TEAR), FALLING_SPORE_BLOSSOM(Particle.FALLING_SPORE_BLOSSOM), FALLING_WATER(Particle.FALLING_WATER), FIREWORK(Particle.FIREWORK), FISHING(Particle.FISHING), FLAME(Particle.FLAME), FLASH(Particle.FLASH), GLOW(Particle.GLOW), GLOW_SQUID_INK(Particle.GLOW_SQUID_INK), GUST(Particle.GUST), GUST_EMITTER_LARGE(Particle.GUST_EMITTER_LARGE), GUST_EMITTER_SMALL(Particle.GUST_EMITTER_SMALL), HAPPY_VILLAGER(Particle.HAPPY_VILLAGER), HEART(Particle.HEART), INFESTED(Particle.INFESTED), INSTANT_EFFECT(Particle.INSTANT_EFFECT), ITEM_COBWEB(Particle.ITEM_COBWEB), ITEM_SLIME(Particle.ITEM_SLIME), ITEM_SNOWBALL(Particle.ITEM_SNOWBALL), LANDING_HONEY(Particle.LANDING_HONEY), LANDING_LAVA(Particle.LANDING_LAVA), LANDING_OBSIDIAN_TEAR(Particle.LANDING_OBSIDIAN_TEAR), LARGE_SMOKE(Particle.LARGE_SMOKE), LAVA(Particle.LAVA), MYCELIUM(Particle.MYCELIUM), NAUTILUS(Particle.NAUTILUS), NOTE(Particle.NOTE), OMINOUS_SPAWNING(Particle.OMINOUS_SPAWNING), POOF(Particle.POOF), PORTAL(Particle.PORTAL), RAID_OMEN(Particle.RAID_OMEN), RAIN(Particle.RAIN), REVERSE_PORTAL(Particle.REVERSE_PORTAL), SCRAPE(Particle.SCRAPE), SCULK_CHARGE_POP(Particle.SCULK_CHARGE_POP), SCULK_SOUL(Particle.SCULK_SOUL), SMALL_FLAME(Particle.SMALL_FLAME), SMALL_GUST(Particle.SMALL_GUST), SMOKE(Particle.SMOKE), SNEEZE(Particle.SNEEZE), SNOWFLAKE(Particle.SNOWFLAKE), SONIC_BOOM(Particle.SONIC_BOOM), SOUL(Particle.SOUL), SOUL_FIRE_FLAME(Particle.SOUL_FIRE_FLAME), SPIT(Particle.SPIT), SPLASH(Particle.SPLASH), SPORE_BLOSSOM_AIR(Particle.SPORE_BLOSSOM_AIR), SQUID_INK(Particle.SQUID_INK), SWEEP_ATTACK(Particle.SWEEP_ATTACK), TOTEM_OF_UNDYING(Particle.TOTEM_OF_UNDYING), TRIAL_OMEN(Particle.TRIAL_OMEN), TRIAL_SPAWNER_DETECTION(Particle.TRIAL_SPAWNER_DETECTION), TRIAL_SPAWNER_DETECTION_OMINOUS(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS), UNDERWATER(Particle.UNDERWATER), VAULT_CONNECTION(Particle.VAULT_CONNECTION), WARPED_SPORE(Particle.WARPED_SPORE), WAX_OFF(Particle.WAX_OFF), WAX_ON(Particle.WAX_ON), WHITE_ASH(Particle.WHITE_ASH), WHITE_SMOKE(Particle.WHITE_SMOKE), WITCH(Particle.WITCH)
         //
         ;
-        @Getter
+
         private final Particle particle;
 
-        Simple(Particle particle) {
+        SimpleEffect(Particle particle) {
             this.particle = particle;
         }
 
@@ -44,7 +40,7 @@ public class EffectStore {
 
         public EffectStore spawnParticle(Location location, int count, double dx, double dy, double dz, double extra) {
             location.getWorld().spawnParticle(particle, location, count, dx, dy, dz, extra);
-            return instance;
+            return EffectStore.getInstance();
         }
 
         public EffectStore spawnParticle(Player player, Location location) {
@@ -65,9 +61,12 @@ public class EffectStore {
 
         public EffectStore spawnParticle(Player player, Location location, int count, double dx, double dy, double dz, double extra) {
             player.spawnParticle(particle, location, count, dx, dy, dz, extra);
-            return instance;
+            return EffectStore.getInstance();
         }
     }
+
+
+
 
     private EffectStore() {
     }
@@ -949,368 +948,7 @@ public class EffectStore {
         return this;
     }
 
-    @Getter
-    public static class BlockDisplayControl {
-        private final BlockDisplay display;
 
-        private BlockDisplayControl(BlockDisplay display) {
-            this.display = display;
-        }
 
-        public BlockDisplayControl setScale(float size) {
-            return setScale(size, size, size, 0);
-        }
 
-        public BlockDisplayControl setScale(float size, double seconds) {
-            return setScale(size, size, size, seconds);
-        }
-
-        public BlockDisplayControl setScale(float sizeX, float sizeY, float sizeZ) {
-            return setScale(sizeX, sizeY, sizeZ, 0);
-        }
-
-        public BlockDisplayControl setScale(float sizeX, float sizeY, float sizeZ, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
-                    Transformation transformation = display.getTransformation();
-                    transformation.getScale().set(sizeX, sizeY, sizeZ);
-                    display.setTransformation(transformation);
-                }, (long) (seconds * Bukkit.getServerTickManager().getTickRate()));
-            else {
-                Transformation transformation = display.getTransformation();
-                transformation.getScale().set(sizeX, sizeY, sizeZ);
-                display.setTransformation(transformation);
-            }
-            return this;
-        }
-
-        public BlockDisplayControl setLiveTick(int second) {
-            display.setMetadata("live", new FixedMetadataValue(Core.getCore(), second));
-            return this;
-        }
-
-        public BlockDisplayControl setLife(double seconds) { // 현재 시간 비례
-            display.setMetadata("life", new FixedMetadataValue(Core.getCore(), System.currentTimeMillis() + (long) (seconds * 1000)));
-            return this;
-        }
-
-        public void remove() {
-            this.display.remove();
-        }
-
-        public BlockDisplayControl setTransformationMatrix(Matrix4f matrix4f) {
-            return setTransformationMatrix(matrix4f, 0);
-        }
-
-        public BlockDisplayControl setTransformationMatrix(Matrix4f matrix4f, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> display.setTransformationMatrix(matrix4f), (long) (Bukkit.getServerTickManager().getTickRate() * seconds));
-            else
-                display.setTransformationMatrix(matrix4f);
-            return this;
-        }
-
-        public BlockDisplayControl setTransformation(Transformation transformation) {
-            return setTransformation(transformation, 0);
-        }
-
-        public BlockDisplayControl setTransformation(Transformation transformation, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> display.setTransformation(transformation), (long) (Bukkit.getServerTickManager().getTickRate() * seconds));
-            else
-                display.setTransformation(transformation);
-            return this;
-        }
-
-        public BlockDisplayControl setViewRange(float range) {
-            display.setViewRange(range);
-            return this;
-        }
-
-        public BlockDisplayControl setTeleportDuration(int duration) {
-            display.setTeleportDuration(duration);
-            return this;
-        }
-
-        public BlockDisplayControl setShadowStrength(float strength) {
-            display.setShadowStrength(strength);
-            return this;
-        }
-
-        public BlockDisplayControl setShadowRadius(float radius) {
-            display.setShadowRadius(radius);
-            return this;
-        }
-
-        public BlockDisplayControl setInterpolationDuration(int tick) {
-            display.setInterpolationDuration(tick);
-            return this;
-        }
-
-        public BlockDisplayControl setInterpolationDelay(int tick) {
-            display.setInterpolationDelay(tick);
-            return this;
-        }
-
-        public BlockDisplayControl setGlowing(boolean glow) {
-            display.setGlowing(glow);
-            return this;
-        }
-
-        public BlockDisplayControl setGlowColorOverride(Color color) {
-            display.setGlowColorOverride(color);
-            return this;
-        }
-
-        public BlockDisplayControl setBrightness(Display.Brightness brightness) {
-            display.setBrightness(brightness);
-            return this;
-        }
-
-        public BlockDisplayControl setBillboard(Display.Billboard billboard) {
-            display.setBillboard(billboard);
-            return this;
-        }
-
-        public BlockDisplayControl setDisplayHeight(float height) {
-            display.setDisplayHeight(height);
-            return this;
-        }
-
-        public BlockDisplayControl setDisplayWidth(float width) {
-            display.setDisplayWidth(width);
-            return this;
-        }
-
-        public BlockDisplayControl setBlock(Material type) {
-            return setBlock(type.createBlockData());
-        }
-
-        public BlockDisplayControl setBlock(BlockData data) {
-            display.setBlock(data);
-            return this;
-        }
-
-        public static BlockDisplayControl spawn(Location loc) {
-            BlockDisplay display = (BlockDisplay) loc.getWorld().spawnEntity(loc, EntityType.BLOCK_DISPLAY);
-            return new BlockDisplayControl(display);
-        }
-    }
-
-    @Getter
-    public static class ItemDisplayControl {
-        private final ItemDisplay display;
-
-        private ItemDisplayControl(ItemDisplay display) {
-            this.display = display;
-        }
-
-        public ItemDisplayControl setRightRotation(float x, float y, float z, float w) {
-            return setRightRotation(x, y, z, w, 0);
-        }
-
-        public ItemDisplayControl setRightRotation(float x, float y, float z, float w, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
-                    Transformation transformation = display.getTransformation();
-                    transformation.getRightRotation().set(x, y, z, w);
-                    display.setTransformation(transformation);
-                }, (long) (seconds * Bukkit.getServerTickManager().getTickRate()));
-            else {
-                Transformation transformation = display.getTransformation();
-                transformation.getRightRotation().set(x, y, z, w);
-                display.setTransformation(transformation);
-            }
-            return this;
-        }
-
-        public ItemDisplayControl setLeftRotation(float x, float y, float z, float w) {
-            return setLeftRotation(x, y, z, w, 0);
-        }
-
-        public ItemDisplayControl setLeftRotation(float x, float y, float z, float w, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
-                    Transformation transformation = display.getTransformation();
-                    transformation.getLeftRotation().set(x, y, z, w);
-                    display.setTransformation(transformation);
-                }, (long) (seconds * Bukkit.getServerTickManager().getTickRate()));
-            else {
-                Transformation transformation = display.getTransformation();
-                transformation.getLeftRotation().set(x, y, z, w);
-                display.setTransformation(transformation);
-            }
-            return this;
-        }
-
-        public ItemDisplayControl setTranslation(float x, float y, float z) {
-            return setTranslation(x, y, z, 0);
-        }
-
-        public ItemDisplayControl setTranslation(float x, float y, float z, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
-                    Transformation transformation = display.getTransformation();
-                    transformation.getTranslation().set(x, y, z);
-                    display.setTransformation(transformation);
-                }, (long) (seconds * Bukkit.getServerTickManager().getTickRate()));
-            else {
-                Transformation transformation = display.getTransformation();
-                transformation.getTranslation().set(x, y, z);
-                display.setTransformation(transformation);
-            }
-            return this;
-        }
-
-        public ItemDisplayControl setScale(float size) {
-            return setScale(size, size, size, 0);
-        }
-
-        public ItemDisplayControl setScale(float size, double seconds) {
-            return setScale(size, size, size, seconds);
-        }
-
-        public ItemDisplayControl setScale(float sizeX, float sizeY, float sizeZ) {
-            return setScale(sizeX, sizeY, sizeZ, 0);
-        }
-
-        public ItemDisplayControl setScale(float sizeX, float sizeY, float sizeZ, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> {
-                    Transformation transformation = display.getTransformation();
-                    transformation.getScale().set(sizeX, sizeY, sizeZ);
-                    display.setTransformation(transformation);
-                }, (long) (seconds * Bukkit.getServerTickManager().getTickRate()));
-            else {
-                Transformation transformation = display.getTransformation();
-                transformation.getScale().set(sizeX, sizeY, sizeZ);
-                display.setTransformation(transformation);
-            }
-            return this;
-        }
-
-        public ItemDisplayControl setLiveTick(int second) {
-            display.setMetadata("live", new FixedMetadataValue(Core.getCore(), second));
-            return this;
-        }
-
-        public ItemDisplayControl setLife(double seconds) { // 현재 시간 비례
-            display.setMetadata("life", new FixedMetadataValue(Core.getCore(), System.currentTimeMillis() + (long) (seconds * 1000)));
-            return this;
-        }
-
-        public void remove() {
-            this.display.remove();
-        }
-
-        public ItemDisplayControl setItemDisplayTransform(ItemDisplay.ItemDisplayTransform itemDisplayTransform) {
-            return setItemDisplayTransform(itemDisplayTransform, 0);
-        }
-
-        public ItemDisplayControl setItemDisplayTransform(ItemDisplay.ItemDisplayTransform itemDisplayTransform, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> display.setItemDisplayTransform(itemDisplayTransform), (long) (Bukkit.getServerTickManager().getTickRate() * seconds));
-            else
-                display.setItemDisplayTransform(itemDisplayTransform);
-            return this;
-        }
-
-        public ItemDisplayControl setTransformationMatrix(Matrix4f matrix4f) {
-            return setTransformationMatrix(matrix4f, 0);
-        }
-
-        public ItemDisplayControl setTransformationMatrix(Matrix4f matrix4f, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> display.setTransformationMatrix(matrix4f), (long) (Bukkit.getServerTickManager().getTickRate() * seconds));
-            else
-                display.setTransformationMatrix(matrix4f);
-            return this;
-        }
-
-        public ItemDisplayControl setTransformation(Transformation transformation) {
-            return setTransformation(transformation, 0);
-        }
-
-        public ItemDisplayControl setTransformation(Transformation transformation, double seconds) {
-            if (seconds > 0)
-                Bukkit.getScheduler().runTaskLater(Core.getCore(), () -> display.setTransformation(transformation), (long) (Bukkit.getServerTickManager().getTickRate() * seconds));
-            else
-                display.setTransformation(transformation);
-            return this;
-        }
-
-        public ItemDisplayControl setViewRange(float range) {
-            display.setViewRange(range);
-            return this;
-        }
-
-        public ItemDisplayControl setTeleportDuration(int duration) {
-            display.setTeleportDuration(duration);
-            return this;
-        }
-
-        public ItemDisplayControl setShadowStrength(float strength) {
-            display.setShadowStrength(strength);
-            return this;
-        }
-
-        public ItemDisplayControl setShadowRadius(float radius) {
-            display.setShadowRadius(radius);
-            return this;
-        }
-
-        public ItemDisplayControl setInterpolationDuration(int tick) {
-            display.setInterpolationDuration(tick);
-            return this;
-        }
-
-        public ItemDisplayControl setInterpolationDelay(int tick) {
-            display.setInterpolationDelay(tick);
-            return this;
-        }
-
-        public ItemDisplayControl setGlowing(boolean glow) {
-            display.setGlowing(glow);
-            return this;
-        }
-
-        public ItemDisplayControl setGlowColorOverride(Color color) {
-            display.setGlowColorOverride(color);
-            return this;
-        }
-
-        public ItemDisplayControl setBrightness(Display.Brightness brightness) {
-            display.setBrightness(brightness);
-            return this;
-        }
-
-        public ItemDisplayControl setBillboard(Display.Billboard billboard) {
-            display.setBillboard(billboard);
-            return this;
-        }
-
-        public ItemDisplayControl setDisplayHeight(float height) {
-            display.setDisplayHeight(height);
-            return this;
-        }
-
-        public ItemDisplayControl setDisplayWidth(float width) {
-            display.setDisplayWidth(width);
-            return this;
-        }
-
-        public ItemDisplayControl setItem(Material type) {
-            return setItem(new ItemStack(type));
-        }
-
-        public ItemDisplayControl setItem(ItemStack data) {
-            display.setItemStack(data);
-            return this;
-        }
-
-        public static ItemDisplayControl spawn(Location loc) {
-            ItemDisplay display = (ItemDisplay) loc.getWorld().spawnEntity(loc, EntityType.ITEM_DISPLAY);
-            return new ItemDisplayControl(display);
-        }
-    }
 }
