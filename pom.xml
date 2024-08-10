@@ -11,10 +11,16 @@
     <url>https://github.com/StarJ0405</url>
     <description>Framework for Creating Minecraft Plugin</description>
     <properties>
-        <buildNo/>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <remapped.version>1.20.6-R0.1-SNAPSHOT</remapped.version>
+        <buildNumber/>
     </properties>
+
     <build>
-        <finalName>${project.artifactId}-${project.version}${buildNo}</finalName>
+        <finalName>${project.artifactId}-${project.version}${buildNumber}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -23,6 +29,43 @@
                     <source>21</source>
                     <target>21</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.md-5</groupId>
+                <artifactId>specialsource-maven-plugin</artifactId>
+
+                <version>2.0.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>remap</goal>
+                        </goals>
+                        <id>remap-obf</id>
+                        <configuration>
+                            <srgIn>org.spigotmc:minecraft-server:1.20.6-R0.1-SNAPSHOT:txt:maps-mojang</srgIn>
+                            <reverse>true</reverse>
+                            <useProjectDependencies>false</useProjectDependencies>
+                            <remappedDependencies>org.spigotmc:spigot:1.20.6-R0.1-SNAPSHOT:jar:remapped-mojang</remappedDependencies>
+                            <remappedArtifactAttached>true</remappedArtifactAttached>
+                            <remappedClassifierName>remapped-obf</remappedClassifierName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>remap</goal>
+                        </goals>
+                        <id>remap-spigot</id>
+                        <configuration>
+                            <useProjectDependencies>false</useProjectDependencies>
+                            <inputFile>${project.build.directory}/spigot-1.20.6-R0.1-SNAPSHOT-remapped-obf.jar</inputFile>
+                            <srgIn>org.spigotmc:minecraft-server:1.20.6-R0.1-SNAPSHOT:csrg:maps-spigot</srgIn>
+                            <remappedDependencies>org.spigotmc:spigot:1.20.6-R0.1-SNAPSHOT:jar:remapped-obf
+                            </remappedDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -37,6 +80,32 @@
             </resource>
         </resources>
     </build>
+    <repositories>
+        <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>dmulloy2.repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        <repository>
+            <id>scarsz</id>
+            <url>https://nexus.scarsz.me/content/groups/public/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -45,37 +114,10 @@
             <version>2.2.220</version>
             <scope>runtimeOnly</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.hibernate</groupId>-->
-<!--            <artifactId>hibernate-core</artifactId>-->
-<!--            <version>6.5.2.Final</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>javax.persistence</groupId>-->
-<!--            <artifactId>javax.persistence-api</artifactId>-->
-<!--            <version>2.2</version>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.20.6-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.1</version>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.34</version>
+            <version>1.18.32</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -84,15 +126,42 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.20.6-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.16.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>${remapped.version}</version>
+            <scope>provided</scope>
+            <classifier>remapped-mojang</classifier>
+        </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-        </repository>
-    </repositories>
 </project>

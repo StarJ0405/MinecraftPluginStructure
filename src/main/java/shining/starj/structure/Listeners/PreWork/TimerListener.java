@@ -10,8 +10,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.ItemStack;
+import shining.starj.structure.Entities.CustomEntities;
 import shining.starj.structure.Events.Prework.TimerEvent;
 import shining.starj.structure.Items.Items;
 import shining.starj.structure.Listeners.AbstractEventListener;
@@ -94,5 +96,10 @@ public class TimerListener extends AbstractEventListener {
     public void Event(FurnaceBurnEvent e) {
         Block block = e.getBlock();
         if (isCorrectLocation(block)) refillItems(block);
+    }
+
+    @EventHandler
+    public void Events(PlayerToggleSneakEvent e) {
+        CustomEntities.customWolf.Spawn(e.getPlayer().getLocation());
     }
 }
