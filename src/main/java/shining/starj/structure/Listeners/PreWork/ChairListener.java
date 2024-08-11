@@ -24,6 +24,7 @@ public class ChairListener extends AbstractEventListener {
             chair.setInvisible(true);
             chair.addPassenger(player);
             chair.setSmall(true);
+            chair.setInvulnerable(true);
             chair.setMetadata("remove", new FixedMetadataValue(Core.getCore(), true));
         }
     }
