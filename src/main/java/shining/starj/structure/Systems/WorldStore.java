@@ -1,11 +1,15 @@
 package shining.starj.structure.Systems;
 
-import lombok.Builder;
 import org.bukkit.*;
+import org.bukkit.generator.ChunkGenerator;
+
+import javax.annotation.Nonnull;
+import java.util.Random;
 
 public class WorldStore {
     private final String name;
     private WorldType type = WorldType.NORMAL;
+    private ChunkGenerator chunkGenerator;
     private boolean hardcore = false;
     private boolean autoSave = true;
     private Difficulty difficulty = Difficulty.NORMAL;
@@ -58,13 +62,26 @@ public class WorldStore {
     private boolean universalAnger = false;
     private boolean waterSourceConversion = false;
 
-    @Builder
-    public WorldStore(String name) {
+    private WorldStore(String name) {
         this.name = name;
+    }
+
+    public static WorldStore name(String name) {
+        return new WorldStore(name);
     }
 
     public WorldStore type(WorldType type) {
         this.type = type;
+        return this;
+    }
+
+    public WorldStore chunkGenerator(ChunkGenerator chunkGenerator) {
+        this.chunkGenerator = chunkGenerator;
+        return this;
+    }
+
+    public WorldStore emptyChunkGenerator() {
+        this.chunkGenerator = new EmptyChunkGenerator();
         return this;
     }
 
@@ -329,6 +346,8 @@ public class WorldStore {
         if (world == null) {
             WorldCreator creator = new WorldCreator(name);
             creator = creator.type(type);
+            if (chunkGenerator != null)
+                creator = creator.generator(chunkGenerator);
             world = Bukkit.createWorld(creator);
         }
         world.setHardcore(hardcore);
@@ -383,5 +402,14 @@ public class WorldStore {
         world.setGameRule(GameRule.UNIVERSAL_ANGER, universalAnger);
         world.setGameRule(GameRule.WATER_SOURCE_CONVERSION, waterSourceConversion);
         return world;
+    }
+
+    public static class EmptyChunkGenerator extends ChunkGenerator {
+
+        @Override
+        @Nonnull
+        public ChunkData generateChunkData(@Nonnull World world, @Nonnull Random random, int x, int z, @Nonnull BiomeGrid biome) {
+            return createChunkData(world);
+        }
     }
 }
