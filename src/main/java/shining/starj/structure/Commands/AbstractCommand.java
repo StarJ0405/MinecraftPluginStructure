@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import shining.starj.structure.Commands.Prework.ItemCommand;
 import shining.starj.structure.Commands.Prework.PermissionCommand;
 import shining.starj.structure.Commands.Prework.SudoCommand;
+import shining.starj.structure.Commands.Prework.WorldMoveCommand;
 import shining.starj.structure.Core;
 import shining.starj.structure.Exceptions.IncompleteCommandException;
 import shining.starj.structure.Exceptions.NoAuthorityException;
@@ -85,6 +86,7 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
         new SudoCommand();
         new PermissionCommand();
         new ItemCommand();
+        new WorldMoveCommand();
     }
 
 }
