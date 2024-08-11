@@ -80,7 +80,7 @@ public class TimerListener extends AbstractEventListener {
         Location timeLocation = getTimeLocation();
         for (int x = -2; x <= 2; x++)
             for (int y = 0; y <= 2; y++)
-                for (int z = -2; z < 2; z++)
+                for (int z = -2; z <= 2; z++)
                     if (x != 0 || y != 0 || z != 0)
                         timeLocation.clone().add(x, y, z).getBlock().setType(Material.BEDROCK, true);
         Block block = timeLocation.getBlock();
