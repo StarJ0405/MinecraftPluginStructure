@@ -94,7 +94,7 @@ public class DurableItems extends Items {
 
         @Override
         public DurableItems build() {
-            return new DurableItems(key, displayName, material, model, interact, fireResistant, hideGlint, hideTooltip, unbreakable, lores, maxDurability, durability);
+            return new DurableItems(key, displayName, material, model, interact, fireResistant, glint, hideTooltip, unbreakable, lores, maxDurability, durability);
         }
     }
 

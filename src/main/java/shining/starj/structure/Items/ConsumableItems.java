@@ -120,7 +120,7 @@ public class ConsumableItems extends Items {
 
         @Override
         public ConsumableItems build() {
-            return new ConsumableItems(key, displayName, material, lores, model, interact, fireResistant, hideGlint, hideTooltip, unbreakable, maxStackSize, canAlwaysEat, eatSeconds, nutrition, saturation, foodEffectInfos);
+            return new ConsumableItems(key, displayName, material, lores, model, interact, fireResistant, glint, hideTooltip, unbreakable, maxStackSize, canAlwaysEat, eatSeconds, nutrition, saturation, foodEffectInfos);
         }
     }
 

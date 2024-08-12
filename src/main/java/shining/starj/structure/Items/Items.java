@@ -9,8 +9,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import shining.starj.structure.Core;
-import shining.starj.structure.Items.Prework.BagItem;
 import shining.starj.structure.GUIs.InventorySize;
+import shining.starj.structure.Items.Prework.BagItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,12 +43,12 @@ public class Items {
     protected Integer model;
     protected final boolean interact;
     protected final boolean fireResistant;
-    protected final boolean hideGlint;
+    protected final boolean glint;
     protected final boolean hideTooltip;
     protected final boolean unbreakable;
     protected int maxStackSize;
 
-    public Items(String key, String displayName, Material material, String[] lores, Integer model, boolean interact, boolean fireResistant, boolean hideGlint, boolean hideTooltip, boolean unbreakable, int maxStackSize) {
+    public Items(String key, String displayName, Material material, String[] lores, Integer model, boolean interact, boolean fireResistant, boolean glint, boolean hideTooltip, boolean unbreakable, int maxStackSize) {
         this.key = key;
         this.displayName = displayName;
         this.material = material;
@@ -56,7 +56,7 @@ public class Items {
         this.model = model != null ? 1000000 + model * 1000 : null;
         this.interact = interact;
         this.fireResistant = fireResistant;
-        this.hideGlint = hideGlint;
+        this.glint = glint;
         this.hideTooltip = hideTooltip;
         this.unbreakable = unbreakable;
         this.maxStackSize = Math.min(99, Math.max(1, maxStackSize));
@@ -76,7 +76,7 @@ public class Items {
         protected Integer model;
         protected boolean interact;
         protected boolean fireResistant;
-        protected boolean hideGlint;
+        protected boolean glint;
         protected boolean hideTooltip;
         protected boolean unbreakable;
         protected int maxStackSize;
@@ -117,7 +117,7 @@ public class Items {
         }
 
         public ItemsBuilder glint(boolean glint) {
-            this.hideGlint = glint;
+            this.glint = glint;
             return this;
         }
 
@@ -137,7 +137,7 @@ public class Items {
         }
 
         public Items build() {
-            return new Items(key, displayName, material, lores, model, interact, fireResistant, hideGlint, hideTooltip, unbreakable, maxStackSize);
+            return new Items(key, displayName, material, lores, model, interact, fireResistant, glint, hideTooltip, unbreakable, maxStackSize);
         }
     }
 
@@ -147,10 +147,14 @@ public class Items {
         if (this.model != null) meta.setCustomModelData(this.model);
         meta.setDisplayName(this.displayName);
         meta.getPersistentDataContainer().set(typeNamespaceKey, PersistentDataType.STRING, this.key);
-        meta.setFireResistant(fireResistant);
-        meta.setEnchantmentGlintOverride(!hideGlint);
-        meta.setHideTooltip(hideTooltip);
-        meta.setUnbreakable(unbreakable);
+        if (fireResistant)
+            meta.setFireResistant(true);
+        if (glint)
+            meta.setEnchantmentGlintOverride(true);
+        if (hideTooltip)
+            meta.setHideTooltip(true);
+        if (unbreakable)
+            meta.setUnbreakable(true);
         if (lores != null)
             meta.setLore(Arrays.stream(lores).toList());
         meta.setMaxStackSize(maxStackSize);
